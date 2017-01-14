@@ -17,9 +17,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import movies.popular.jd.com.udacitypopularmovies.BuildConfig;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
-import movies.popular.jd.com.udacitypopularmovies.data.MovieQueryJsonParser;
+import movies.popular.jd.com.udacitypopularmovies.util.MovieQueryJsonParser;
+
+import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.API_KEY;
+import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.POPULAR_CHOICE;
+import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.POPULAR_MOVIE_BASE_QUERY;
+import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.TOP_RATED_CHOICE;
+import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.TOP_RATED_MOVIE_BASE_QUERY;
+import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.fetchHttpDataMovie;
 
 /**
  * Background task for fetching and parsing Movies data !!!
@@ -28,18 +34,7 @@ import movies.popular.jd.com.udacitypopularmovies.data.MovieQueryJsonParser;
 
 public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
 
-    private static final String TAG = "FETCH_MOIE_TASK";
-
-    private static final String API_KEY = BuildConfig.MOVIE_DB_API_KEY;
-
-    private static final String BASE_QUERY = "http://api.themoviedb.org/3";
-
-    private static final String TOP_RATED_MOVIE_BASE_QUERY = BASE_QUERY + "/movie/top_rated?";
-    private static final String POPULAR_MOVIE_BASE_QUERY = BASE_QUERY + "/movie/popular?";
-
-    private static final String POPULAR_CHOICE = "popular";
-
-    private static final String TOP_RATED_CHOICE = "top_rated";
+    private static final String TAG = "FETCH_MOVIE_TASK";
 
     private Context mContext = null;
 
@@ -59,39 +54,25 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
         String baseQuery = null;
         HttpURLConnection httpConnection = null;
 
-        // figuring out which type of movies to be fetched ...
-        if (queryChoice.equalsIgnoreCase(POPULAR_CHOICE)) {
-            baseQuery = POPULAR_MOVIE_BASE_QUERY;
-        } else if (queryChoice.equalsIgnoreCase(TOP_RATED_CHOICE)) {
-            baseQuery = TOP_RATED_MOVIE_BASE_QUERY;
-        } else {
+        Uri queryUri = MovieTaskHelper.buildMovieListRequestUrl(queryChoice);
+
+        if (queryChoice == null){
             Log.e(TAG, "Wrong choice for querying data ");
             return null;
         }
 
         try {
             // need to add API_KEY before doing query
-            Uri queryUri = Uri.parse(baseQuery).buildUpon()
-                    .appendQueryParameter("api_key", API_KEY)
-                    .build();
-
-            URL url = new URL(queryUri.toString());
-            httpConnection = (HttpURLConnection) url.openConnection();
-            httpConnection.setRequestMethod("GET");
-            httpConnection.connect();
-            String res = readIncomingData(httpConnection.getInputStream());
-
-            // Get the list of CONTENT_VALUES back now insert
+            String res = fetchHttpDataMovie(queryUri);
             if (res != null) {
-
+                Log.d(TAG,"Successfully Fetching Movies data from Movie DB");
                 List<ContentValues> resCVList = MovieQueryJsonParser.parseMovieListResult(res);
-
                 // performing insert to DBs
                 if (resCVList.size() > 0){
                         mContext.getContentResolver()
-                                .bulkInsert(MovieContract.MovieEntry.buildMovieListUri(),
+                                .bulkInsert(MovieContract.MovieEntry.CONTENT_URI,
                                         (ContentValues[]) resCVList.toArray());
-
+                    Log.d(TAG,"Finished Inserting data to DB");
                 }
             }
 
@@ -110,35 +91,5 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
         return null;
     }
 
-    /**
-     * Helper for reading data from input stream
-     *
-     * @param is
-     * @return
-     */
-    private String readIncomingData(InputStream is) {
-
-        StringBuffer sb = null;
-        BufferedReader bfr = null;
-        String line = null;
-
-        try {
-            if (is != null) {
-                sb = new StringBuffer();
-                bfr = new BufferedReader(new InputStreamReader(is));
-                while ((line = bfr.readLine()) != null) {
-                    // adding newline does not affect json format
-                    // but help deubgging way easier
-                    sb.append(line + "\n");
-                }
-                return sb.toString();
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "ERROR to read data from Input stream reader");
-            e.printStackTrace();
-        }
-
-        return null;
-    }
 
 }

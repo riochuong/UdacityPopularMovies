@@ -110,7 +110,7 @@ public class MovieProvider  extends ContentProvider{
             for (ContentValues val : values){
                 // ignore conflict to preserved favortie movies
                 long _id= db.insertWithOnConflict(
-                            MovieContract.MovieEntry.TABLE_NAME,
+                            tabName,
                             null,
                             val,
                             SQLiteDatabase.CONFLICT_IGNORE);
