@@ -1,6 +1,7 @@
-package movies.popular.jd.com.udacitypopularmovies;
+package movies.popular.jd.com.udacitypopularmovies.tasks;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -16,6 +17,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import movies.popular.jd.com.udacitypopularmovies.BuildConfig;
+import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieQueryJsonParser;
 
 /**
@@ -38,6 +41,11 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
 
     private static final String TOP_RATED_CHOICE = "top_rated";
 
+    private Context mContext = null;
+
+    public FetchMovieListTask( Context ctx) {
+        mContext = ctx;
+    }
 
     @Override
     protected Void doInBackground(String... strings) {
@@ -80,6 +88,9 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
 
                 // performing insert to DBs
                 if (resCVList.size() > 0){
+                        mContext.getContentResolver()
+                                .bulkInsert(MovieContract.MovieEntry.buildMovieListUri(),
+                                        (ContentValues[]) resCVList.toArray());
 
                 }
             }

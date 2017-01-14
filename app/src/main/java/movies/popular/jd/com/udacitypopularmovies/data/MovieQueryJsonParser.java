@@ -52,6 +52,7 @@ public class MovieQueryJsonParser {
         String origTitle;
         boolean adult;
         boolean video;
+        boolean favor = false;
         double voteAvg;
         String posterPath;
         String overview;
@@ -80,17 +81,18 @@ public class MovieQueryJsonParser {
             voteCount = result.getLong(VOTE_COUNT);
 
             // put data in
-            newCv.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,ID);
-            newCv.put(MovieContract.MovieEntry.COLUMN_TITLE,TITLE);
-            newCv.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,ORIGINAL_TITLE);
-            newCv.put(MovieContract.MovieEntry.COLUMN_ADULT,ADULT);
-            newCv.put(MovieContract.MovieEntry.COLUMN_VIDEO,VIDEO);
-            newCv.put(MovieContract.MovieEntry.COLUMN_VOTE_AVG,VOTE_AVG);
-            newCv.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH,POSTER_PATH);
-            newCv.put(MovieContract.MovieEntry.COLUMN_OVERVIEW,OVERVIEW);
-            newCv.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,RELEASE_DATE);
-            newCv.put(MovieContract.MovieEntry.COLUMN_POPULARITY,POPULARITY);
-            newCv.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT,VOTE_COUNT);
+            newCv.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,id);
+            newCv.put(MovieContract.MovieEntry.COLUMN_TITLE,title);
+            newCv.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,origTitle);
+            newCv.put(MovieContract.MovieEntry.COLUMN_ADULT,adult);
+            newCv.put(MovieContract.MovieEntry.COLUMN_VIDEO,video);
+            newCv.put(MovieContract.MovieEntry.COLUMN_VOTE_AVG,voteAvg);
+            newCv.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH,posterPath);
+            newCv.put(MovieContract.MovieEntry.COLUMN_OVERVIEW,overview);
+            newCv.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,releaseDate);
+            newCv.put(MovieContract.MovieEntry.COLUMN_POPULARITY,popularity);
+            newCv.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT,voteCount);
+            newCv.put(MovieContract.MovieEntry.COLUMN_FAVORITE,favor);
             cVList.add(newCv);
         }
 
