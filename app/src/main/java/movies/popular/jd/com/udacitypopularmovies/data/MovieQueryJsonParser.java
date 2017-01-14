@@ -1,8 +1,13 @@
 package movies.popular.jd.com.udacitypopularmovies.data;
 
+import android.content.ContentValues;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by chuondao on 1/12/17.
@@ -11,6 +16,8 @@ import org.json.JSONObject;
 public class MovieQueryJsonParser {
 
     public static final String RESULTS = "results";
+
+    // movies column match with Content_provider
     public static final String POSTER_PATH = "poster_path";
     public static final String ADULT = "adult";
     public static final String ID = "id";
@@ -37,7 +44,7 @@ public class MovieQueryJsonParser {
      * inserted in to the DB
      * @param res
      */
-    public static void parseMovieListResult (String res) throws JSONException {
+    public static List<ContentValues> parseMovieListResult (String res) throws JSONException {
 
         // values to be saved
         long id;
@@ -55,8 +62,10 @@ public class MovieQueryJsonParser {
         JSONObject rootObject = new JSONObject(res);
         JSONArray resultArray = rootObject.getJSONArray(RESULTS);
         int lenOfResults = resultArray.length();
+        List<ContentValues> cVList = new ArrayList<>();
 
         for (int i = 0; i <lenOfResults ; i++) {
+            ContentValues newCv = new ContentValues();
             JSONObject result = resultArray.getJSONObject(i);
             id = result.getLong(ID);
             title = result.getString(TITLE);
@@ -69,8 +78,23 @@ public class MovieQueryJsonParser {
             releaseDate = result.getString(RELEASE_DATE);
             popularity = result.getDouble(POPULARITY);
             voteCount = result.getLong(VOTE_COUNT);
+
+            // put data in
+            newCv.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,ID);
+            newCv.put(MovieContract.MovieEntry.COLUMN_TITLE,TITLE);
+            newCv.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,ORIGINAL_TITLE);
+            newCv.put(MovieContract.MovieEntry.COLUMN_ADULT,ADULT);
+            newCv.put(MovieContract.MovieEntry.COLUMN_VIDEO,VIDEO);
+            newCv.put(MovieContract.MovieEntry.COLUMN_VOTE_AVG,VOTE_AVG);
+            newCv.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH,POSTER_PATH);
+            newCv.put(MovieContract.MovieEntry.COLUMN_OVERVIEW,OVERVIEW);
+            newCv.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,RELEASE_DATE);
+            newCv.put(MovieContract.MovieEntry.COLUMN_POPULARITY,POPULARITY);
+            newCv.put(MovieContract.MovieEntry.COLUMN_VOTE_COUNT,VOTE_COUNT);
+            cVList.add(newCv);
         }
 
+        return cVList;
 
     }
 

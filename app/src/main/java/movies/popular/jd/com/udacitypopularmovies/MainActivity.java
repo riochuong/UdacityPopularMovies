@@ -10,6 +10,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         FetchMovieListTask fetchTask = new FetchMovieListTask();
-        fetchTask.execute("reviews","297761");
+        fetchTask.execute("trailers","297761");
     }
 }
