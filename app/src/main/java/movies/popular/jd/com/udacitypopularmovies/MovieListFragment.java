@@ -12,8 +12,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.HashMap;
+
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieListTask;
+import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
 
 
 /**
@@ -27,6 +30,7 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
     MovieCursorRecyclerAdapter mAdapter = null;
     Cursor mCursor;
 
+
     // TODO: Rename and change types and number of parameters
     public static MovieListFragment newInstance(String param1, String param2) {
         MovieListFragment fragment = new MovieListFragment();
@@ -34,6 +38,8 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         fragment.setArguments(args);
         return fragment;
     }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

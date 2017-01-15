@@ -15,7 +15,11 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+import java.util.List;
+
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
+import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
 
 /**
@@ -30,9 +34,14 @@ public class MovieCursorRecyclerAdapter extends
     private Cursor mCursor;
     private boolean mDataValid;
     private Context mContext;
+
     // important to have the data oberver incase the
     // cursor data is changed outside of the app.
     private DataChangeObserver mDataChangeObserver;
+
+    // to avoid keep querying db for fav. movies display
+    // and to keep consistent data ..
+    HashMap<String,Integer> mFavMoviesMap;
 
     public MovieCursorRecyclerAdapter(Context ctx, Cursor cursor) {
         mContext = ctx;
@@ -41,6 +50,27 @@ public class MovieCursorRecyclerAdapter extends
         // register data change observer for invalid data notification
         if (cursor != null) {
             cursor.registerDataSetObserver(mDataChangeObserver);
+        }
+        initializeFavMoviesMap();
+    }
+
+    /**
+     * helper to initialize movie favs. hashmap whenever we
+     * swap the cursor.
+     */
+    private void initializeFavMoviesMap(){
+        if (mCursor == null)
+            return;
+        // discard all old data
+        mFavMoviesMap = new HashMap<>();
+        String movieId;
+        int isFav;
+        // traverse and add to hashmap if movies is favorite or not
+        for (int i = 0; i < mCursor.getCount() ; i++) {
+            mCursor.moveToPosition(i);
+            movieId = MovieCursorHelper.getMovieIdFromCursor(mCursor);
+            isFav = MovieCursorHelper.isMovieFavorite(mCursor);
+            mFavMoviesMap.put(movieId,isFav);
         }
     }
 
@@ -63,11 +93,11 @@ public class MovieCursorRecyclerAdapter extends
             throw new IllegalStateException
                     ("Could not move cursor to the specifed position: " + position);
         }
-        onBindViewHolder(holder, mCursor);
+        onBindViewHolder(holder, mCursor, position);
     }
 
 
-    public void onBindViewHolder(MovieItemViewHolder holder, Cursor cursor) {
+    public void onBindViewHolder(MovieItemViewHolder holder, Cursor cursor, int position) {
         // bind data
         String movieId = cursor.getString(
             cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID)
@@ -82,10 +112,9 @@ public class MovieCursorRecyclerAdapter extends
                         cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE)) + "");
 
         // set correct favorite listener when user click on the star icon
-        boolean isFav = cursor.getInt(
-                cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE)) > 0;
+        boolean isFav = (mFavMoviesMap.get(movieId) > 0);
         holder.mFavStar.setChecked(isFav);
-        holder.mFavStar.setOnClickListener(new OnFavSelectListener(movieId,isFav));
+        holder.mFavStar.setOnClickListener(new OnFavSelectListener(movieId, isFav, position));
 
         String posterPath = cursor.getString(
             cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH)
@@ -98,22 +127,29 @@ public class MovieCursorRecyclerAdapter extends
     }
 
     /**
-     * helper to implement change to data set when
+     * OnClick listener for checkbox favortie
      */
     private class OnFavSelectListener implements View.OnClickListener {
         private String mMovideId;
         private boolean mChecked;
-        public OnFavSelectListener(String movieId, boolean checked) {
+        private int mPosition;
+        public OnFavSelectListener(String movieId, boolean checked, int pos) {
             mMovideId = movieId;
             mChecked = checked;
+            mPosition = pos;
         }
 
         @Override
         public void onClick(View view) {
+            // due to onChecked bug...need to do a cast for checking here
             boolean isChecked = ((CheckBox)view).isChecked();
+
+            // only needs to modify the db if there is a change
             if (isChecked != mChecked){
                 ContentValues cv = new ContentValues();
                 cv.put(MovieContract.MovieEntry.COLUMN_FAVORITE, (isChecked ? 1 : 0));
+                // update hashmap and database to keep data consistent
+                mFavMoviesMap.put(mMovideId,(isChecked ? 1 : 0));
                 MovieCursorRecyclerAdapter.this.mContext.getContentResolver()
                         .update(
                                 MovieContract.MovieEntry.buildMovieFavUpdateUri(mMovideId),
@@ -122,6 +158,9 @@ public class MovieCursorRecyclerAdapter extends
                                 new String[]{mMovideId}
                         );
                 mChecked = isChecked;
+                // we do not need to notify the dataset changed here
+                // because we dont want to change the cursor
+                notifyItemChanged(mPosition);
             }
 
         }
@@ -146,10 +185,13 @@ public class MovieCursorRecyclerAdapter extends
             mCursor = newCursor;
             mCursor.registerDataSetObserver(mDataChangeObserver);
             mDataValid = true;
+            // initialize fav movies hashmap here
+            initializeFavMoviesMap();
             notifyDataSetChanged();
         } else {
             mDataValid = false;
             mCursor = null;
+            mFavMoviesMap = null;
             notifyDataSetChanged();
         }
     }
@@ -166,6 +208,7 @@ public class MovieCursorRecyclerAdapter extends
     public long getItemId(int position) {
         if (mDataValid && mCursor != null) {
             mCursor.moveToPosition(position);
+            // movieID should be unique for each movie
             int movieIdColIdx = mCursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
             return Long.parseLong(mCursor.getString(movieIdColIdx));
         }
