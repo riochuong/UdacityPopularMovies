@@ -30,9 +30,9 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_MOVIE_LIST_TABLE =
                 "CREATE TABLE "+ MovieEntry.TABLE_NAME+ " ( " +
                         MovieEntry._ID + " INTEGER PRIMARY KEY, "+
-                        MovieEntry.COLUMN_ADULT + " BOOLEAN NOT NULL, "+
+                        MovieEntry.COLUMN_ADULT + " INTEGER NOT NULL, "+
                         MovieEntry.COLUMN_IMAGE + " BLOB, "+
-                        MovieEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, "+
+                        MovieEntry.COLUMN_MOVIE_ID + " INTEGER UNIQUE NOT NULL, "+
                         MovieEntry.COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL, "+
                         MovieEntry.COLUMN_TITLE + " TEXT NOT NULL,"+
                         MovieEntry.COLUMN_OVERVIEW + " TEXT, "+
@@ -40,37 +40,19 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                         MovieEntry.COLUMN_RELEASE_DATE + " INTEGER NOT NULL, "+
                         MovieEntry.COLUMN_VOTE_AVG + " REAL NOT NULL, "+
                         MovieEntry.COLUMN_VOTE_COUNT + " INTEGER NOT NULL, "+
-                        MovieEntry.COLUMN_VIDEO + " BOOLEAN NOT NULL, "+
-                        MovieEntry.COLUMN_FAVORITE + " BOOLEAN NOT NULL"+
+                        MovieEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL, "+
+                        MovieEntry.COLUMN_VIDEO + " INTEGER NOT NULL, "+
+                        MovieEntry.COLUMN_FAVORITE + " INTEGER NOT NULL"+
                         " );";
 
-//        final String SQL_CREATE_MOVIE_TRAILERS_TABLE =
-//                "CREATE TABLE "+ TrailerEntry.TABLE_NAME+ " ( " +
-//                        TrailerEntry._ID + " INTEGER PRIMARY KEY, "+
-//                        TrailerEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, "+
-//                        TrailerEntry.COLUMN_TRAILER_NAME + " TEXT NOT NULL, "+
-//                        TrailerEntry.COLUMN_TRAILER_YOUTUBE_LINK + " TEXT NOT NULL "+
-//                        " );";
-//
-//        final String SQL_CREATE_MOVIE_REVIEWS_TABLE =
-//                "CREATE TABLE "+ ReviewEntry.TABLE_NAME+ " ( " +
-//                        ReviewEntry._ID + " INTEGER PRIMARY KEY, "+
-//                        ReviewEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, "+
-//                        ReviewEntry.COLUMN_AUTHOR + " TEXT NOT NULL, "+
-//                        ReviewEntry.COLUMN_CONTENT + " TEXT NOT NULL "+
-//                        " );";
-
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_LIST_TABLE);
-   //     sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_REVIEWS_TABLE);
-       // sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_TRAILERS_TABLE);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         // drop data if DB version change
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+MovieEntry.TABLE_NAME);
-    //    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+TrailerEntry.TABLE_NAME);
-    //    sqLiteDatabase.execSQL("DROP TABLE IF EXISTS "+ReviewEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }

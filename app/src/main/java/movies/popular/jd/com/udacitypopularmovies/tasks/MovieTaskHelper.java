@@ -25,6 +25,8 @@ public class MovieTaskHelper {
 
     public static final String BASE_QUERY = "http://api.themoviedb.org/3";
 
+    public static final String IMG_BASE_QUERY = "http://image.tmdb.org/t/p/w185";
+
     public static final String TOP_RATED_MOVIE_BASE_QUERY = BASE_QUERY + "/movie/top_rated?";
     public static final String POPULAR_MOVIE_BASE_QUERY = BASE_QUERY + "/movie/popular?";
 
@@ -44,6 +46,17 @@ public class MovieTaskHelper {
                 .appendQueryParameter("api_key", API_KEY)
                 .build();
 
+    }
+
+    /**
+     * build icon with W185 so we can request image from picasso
+     * @param path
+     * @return
+     */
+    public static Uri buildMovieIconUrl(String path){
+        String baseQuery = IMG_BASE_QUERY + "/" + path;
+        return Uri.parse(baseQuery).buildUpon().appendQueryParameter("api_key",API_KEY)
+                .build();
     }
 
     /**

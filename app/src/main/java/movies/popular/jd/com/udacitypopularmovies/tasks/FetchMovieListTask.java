@@ -68,10 +68,14 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
                 Log.d(TAG,"Successfully Fetching Movies data from Movie DB");
                 List<ContentValues> resCVList = MovieQueryJsonParser.parseMovieListResult(res);
                 // performing insert to DBs
+                ContentValues[] cvArr = new ContentValues[resCVList.size()];
+
+
+                resCVList.toArray(cvArr);
                 if (resCVList.size() > 0){
                         mContext.getContentResolver()
                                 .bulkInsert(MovieContract.MovieEntry.CONTENT_URI,
-                                        (ContentValues[]) resCVList.toArray());
+                                        cvArr);
                     Log.d(TAG,"Finished Inserting data to DB");
                 }
             }

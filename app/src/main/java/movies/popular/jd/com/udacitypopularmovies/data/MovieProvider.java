@@ -21,6 +21,7 @@ public class MovieProvider  extends ContentProvider{
     static final int MOVIES = 400;
     static final int MOVIES_FAVORITE = 401;
     static final int MOVIE_ITEM_INFO = 402;
+    static final int MOVIE_ITEM_FAV_UPDATE = 403;
 
 
     private static final SQLiteQueryBuilder sMovieDBQueryBuilder;
@@ -66,6 +67,10 @@ public class MovieProvider  extends ContentProvider{
             case MOVIES:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
             case MOVIE_ITEM_INFO:
+                return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
+            case MOVIES_FAVORITE:
+                return MovieContract.MovieEntry.CONTENT_TYPE;
+            case MOVIE_ITEM_FAV_UPDATE:
                 return MovieContract.MovieEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -170,11 +175,18 @@ public class MovieProvider  extends ContentProvider{
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
         int match = sUriMatcher.match(uri);
         SQLiteDatabase db = mMovieDBHelper.getWritableDatabase();
+        int rowCount;
         switch(match){
             case MOVIES:
-                int rowCount =
+                rowCount =
                         db.update(MovieContract.MovieEntry.TABLE_NAME, contentValues, s , strings);
                 // notify affected observer
+                getContext().getContentResolver().notifyChange(uri,null);
+                return rowCount;
+            case MOVIE_ITEM_FAV_UPDATE:
+
+                rowCount =
+                        db.update(MovieContract.MovieEntry.TABLE_NAME, contentValues, s , strings);
                 getContext().getContentResolver().notifyChange(uri,null);
                 return rowCount;
             default:
@@ -208,7 +220,7 @@ public class MovieProvider  extends ContentProvider{
                                 db,
                                 projection,
                                 sFavoriteMovieSelection,
-                                new String[]{"TRUE"},
+                                new String[]{"1"},
                                 null,
                                 null,
                                 sortingOrder);
@@ -255,6 +267,9 @@ public class MovieProvider  extends ContentProvider{
         // uri used to get movies specific info.
         matcher.addURI(MovieContract.CONTENT_AUTHORITY,
                 MovieContract.PATH_MOVIES +"/#", MOVIE_ITEM_INFO);
+
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY,
+                MovieContract.PATH_MOVIES +"/#/fav", MOVIE_ITEM_FAV_UPDATE);
 
         // uri used to get movies specific info.
 //        matcher.addURI(MovieContract.CONTENT_AUTHORITY,

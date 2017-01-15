@@ -17,7 +17,8 @@ import movies.popular.jd.com.udacitypopularmovies.util.MovieReview;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
 
 /**
- * Created by chuondao on 1/14/17.
+ * AsyncTask Loader used for fetching movie details
+ *
  */
 
 public class FetchMovieDetailsTask extends AsyncTaskLoader<Pair

@@ -1,52 +1,36 @@
 package movies.popular.jd.com.udacitypopularmovies;
 
-import android.content.Context;
-import android.net.Uri;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
+import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieListTask;
+
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link MovieListFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link MovieListFragment#newInstance} factory method to
- * create an instance of this fragment.
+ *
  */
-public class MovieListFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class MovieListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static final int MOVIE_LIST_FRAGMENT_LOADER = 0;
+    private static final int GRID_SPAN = 2;
+    GridLayoutManager mLayoutManager = null;
+    MovieCursorRecyclerAdapter mAdapter = null;
+    Cursor mCursor;
 
-    private OnFragmentInteractionListener mListener;
-
-    public MovieListFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MovieListFragment.
-     */
     // TODO: Rename and change types and number of parameters
     public static MovieListFragment newInstance(String param1, String param2) {
         MovieListFragment fragment = new MovieListFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -54,32 +38,92 @@ public class MovieListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_movie_list, container, false);
-    }
+        View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
 
+        // setup Recycler view
+        setupRecyclerView(rootView);
+
+        return rootView;
+    }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * Helper used to setup recycler view 
+     * @param rootLayout
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    private void setupRecyclerView(View rootLayout){
+        RecyclerView recView = (RecyclerView) rootLayout.findViewById(R.id.recyclerview);
+        mLayoutManager = new GridLayoutManager(getContext(),GRID_SPAN);
+        mAdapter = new MovieCursorRecyclerAdapter(this.getContext(), mCursor);
+        recView.setLayoutManager(mLayoutManager);
+        recView.setAdapter(mAdapter);
     }
+
+    /**
+     * this called from MainActivity to change the
+     * display movies on the main activity
+     *
+     */
+    public void onSelectionChange(String choice){
+        Bundle bundle = new Bundle();
+        switch(choice){
+            case "favor":
+                break;
+            case "top_rated":
+                FetchMovieListTask topRatedTask = new FetchMovieListTask(getContext());
+                topRatedTask.execute("top_rated");
+                bundle.putString("choice","top_rated");
+                getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
+                break;
+            case "popular":
+                FetchMovieListTask popukarTask = new FetchMovieListTask(getContext());
+                popukarTask.execute("popular");
+                bundle.putString("choice","popular");
+                getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
+                break;
+
+        }
+
+    }
+
+
+    //************ LOADER CALL BACKS ******************************
+    @Override
+    public Loader onCreateLoader(int id, Bundle args) {
+
+        String choice = args.getString("choice");
+        String sortOrder = " DESC";
+        if (choice.equalsIgnoreCase("top_rated")){
+            sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVG + sortOrder;
+        }
+        else{
+            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + sortOrder;
+        }
+
+        return new CursorLoader(
+                getContext(),
+                MovieContract.MovieEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                sortOrder);
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader loader, Cursor data) {
+            mCursor = data;
+            mAdapter.swapCursor(mCursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader loader) {
+
+    }
+
 }

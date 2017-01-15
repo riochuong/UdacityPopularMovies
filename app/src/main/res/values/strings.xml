@@ -3,4 +3,8 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="popular_select">popular</string>
+    <string name="favorite">favorites</string>
+    <string name="top_rated">top rated</string>
+    <string name="content_authority">movies.popular.jd.com.udacitypopularmovies</string>
 </resources>

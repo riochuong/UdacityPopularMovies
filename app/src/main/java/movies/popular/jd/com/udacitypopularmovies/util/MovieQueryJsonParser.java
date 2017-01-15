@@ -59,9 +59,9 @@ public class MovieQueryJsonParser {
         long id;
         String title;
         String origTitle;
-        boolean adult;
-        boolean video;
-        boolean favor = false;
+        int adult;
+        int video;
+        int favor = 0;
         double voteAvg;
         String posterPath;
         String overview;
@@ -80,8 +80,8 @@ public class MovieQueryJsonParser {
             id = result.getLong(ID);
             title = result.getString(TITLE);
             origTitle = result.getString(ORIGINAL_TITLE);
-            adult = result.getBoolean(ADULT);
-            video = result.getBoolean(VIDEO);
+            adult = (result.getBoolean(ADULT)) ? 1 : 0;
+            video = result.getBoolean(VIDEO) ? 1 : 0;
             voteAvg = result.getDouble(VOTE_AVG);
             posterPath = result.getString(POSTER_PATH);
             overview = result.getString(OVERVIEW);
@@ -112,7 +112,6 @@ public class MovieQueryJsonParser {
     /**
      * Parse Json trailers list . Only care about youtube link for now
      * @param json
-     * @param opt
      * @return
      */
     public static List<MovieTrailer>

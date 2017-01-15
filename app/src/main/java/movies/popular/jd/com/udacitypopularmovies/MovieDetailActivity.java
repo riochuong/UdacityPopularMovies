@@ -2,6 +2,7 @@ package movies.popular.jd.com.udacitypopularmovies;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
@@ -10,4 +11,6 @@ public class MovieDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
     }
+
+
 }

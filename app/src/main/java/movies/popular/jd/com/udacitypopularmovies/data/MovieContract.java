@@ -24,6 +24,8 @@ public class MovieContract {
     // MOVIE TABLE
     public static final class MovieEntry implements BaseColumns {
 
+        public static final String IMG_BASE_URI = "http://image.tmdb.org/t/p/w185";
+
         public static Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIES).build();
 
@@ -56,6 +58,12 @@ public class MovieContract {
         public static Uri buildMovieListUri(long id){
             return ContentUris.withAppendedId(CONTENT_URI,id);
         }
+
+        public static Uri buildMovieFavUpdateUri(String movieId){
+           return CONTENT_URI.buildUpon().appendPath(movieId).appendPath("fav").build();
+        }
+
+
 
         public static String getMovieIdFromUri (Uri uri){
             return uri.getPathSegments().get(1);
