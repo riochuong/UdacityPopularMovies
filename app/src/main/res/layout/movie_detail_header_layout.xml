@@ -1,0 +1,63 @@
+<!--Movie Infomation area-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/movie_detail_info_height"
+    android:layout_margin="@dimen/icon_small_margin"
+    android:orientation="horizontal">
+
+    <!--movie img left side-->
+    <ImageView
+        android:id="@+id/movie_poster_img"
+        android:layout_width="@dimen/movie_detail_img_width"
+        android:layout_height="@dimen/movie_detail_img_height"
+
+        android:scaleType="centerCrop"
+        />
+
+    <!--Movie Info right side-->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/icon_small_margin"
+        android:layout_weight="2"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/movie_header_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/date_release"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:textAppearanceMedium"/>
+
+        <!--rating-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/icon_small_margin"/>
+
+            <TextView
+                android:id="@+id/movie_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:textAppearanceLarge"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
+
+
+

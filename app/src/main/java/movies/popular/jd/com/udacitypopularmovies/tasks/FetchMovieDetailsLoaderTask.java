@@ -1,9 +1,8 @@
 package movies.popular.jd.com.udacitypopularmovies.tasks;
 
-import android.content.AsyncTaskLoader;
+import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Pair;
 
@@ -21,18 +20,23 @@ import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
  *
  */
 
-public class FetchMovieDetailsTask extends AsyncTaskLoader<Pair
-                                <List<MovieReview>,List<MovieTrailer>>> {
+public class FetchMovieDetailsLoaderTask
+        extends AsyncTaskLoader<MovieDetailLoaderInfo> {
 
     String mMoviedId;
     private  static final String TAG = "FetchMovieDetailTask";
-    public FetchMovieDetailsTask(Context context, String movieId) {
+    public FetchMovieDetailsLoaderTask(Context context, String movieId) {
         super(context);
         mMoviedId = movieId;
     }
 
     @Override
-    public Pair<List<MovieReview>,List<MovieTrailer>> loadInBackground() {
+    public MovieDetailLoaderInfo loadInBackground() {
+
+        if (mMoviedId == null){
+            return null;
+        }
+
         Uri reviewUri = MovieTaskHelper.buildMovieReviewsRequestUrl(mMoviedId);
         Uri trailerUri = MovieTaskHelper.buildMovieTrailersRequestUrl(mMoviedId);
 
@@ -42,12 +46,13 @@ public class FetchMovieDetailsTask extends AsyncTaskLoader<Pair
             String trailerRawString = MovieTaskHelper.fetchHttpDataMovie(trailerUri);
 
             // Parse raw json and construct the result to be used for displaying data
-            Pair<List<MovieReview>,List<MovieTrailer>> result =
-                new Pair(
+            MovieDetailLoaderInfo result =
+                new MovieDetailLoaderInfo(
                   MovieQueryJsonParser.parseMovieReviews(reviewRawString, mMoviedId),
                   MovieQueryJsonParser.parseMovieTrailers(trailerRawString,mMoviedId)
                 );
             return result;
+
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG,"IO error during fetch movie details");

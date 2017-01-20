@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="movie_list_ratio_in_two_pane"> 1 </integer>
+    <integer name="two_pane_total"> 3 </integer>
+    <integer name="smallest_two_pane_size_in_dp"> 600 </integer>
+</resources>

@@ -1,5 +1,20 @@
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_horizontal_margin">5dp</dimen>
+    <dimen name="icon_small_margin">5dp</dimen>
+    <dimen name="icon_big_margin">15dp</dimen>
+    <dimen name="activity_vertical_margin">10dp</dimen>
+    <dimen name="movie_img_list_x">360dp</dimen>
+    <dimen name="movie_img_list_y">360dp</dimen>
+    <dimen name="card_corner_radius">10dp</dimen>
+    <dimen name="card_elevation">10dp</dimen>
+    <dimen name="card_view_width">180dp</dimen>
+    <dimen name="card_view_height">300dp</dimen>
+    <dimen name="card_img_height">220dp</dimen>
+    <dimen name="overlap_movie_info">100dp</dimen>
+    <dimen name="movie_detail_info_height">300dp</dimen>
+    <dimen name="movie_over_view_height">100dp</dimen>
+    <dimen name="movie_detail_img_height">200dp</dimen>
+    <dimen name="movie_detail_img_width">120dp</dimen>
+
 </resources>

@@ -32,6 +32,42 @@ public class MovieCursorHelper {
         return null;
     }
 
+    public static String getMovieReleaseDateFromCursor(Cursor cursor){
+        if (cursor != null){
+            return cursor.getString(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE));
+        }
+        return null;
+    }
+
+
+    public static String getMovieRatingFromCursor(Cursor cursor){
+        if (cursor != null){
+            double rating = cursor.getDouble(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVG));
+            return String.format("%.1f",rating);
+        }
+        return null;
+    }
+
+    public static String getMoviePopluarityFromCursor(Cursor cursor){
+        if (cursor != null){
+            double popular =  cursor.getDouble(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POPULARITY));
+            return String.format("%.1f",popular);
+        }
+        return null;
+    }
+
+    public static String getMoviePosterPath(Cursor cursor){
+        if (cursor != null){
+            return cursor.getString(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH));
+        }
+        return null;
+    }
+
+
     /**
      * check if movie is favorite
      * @param cursor
@@ -44,5 +80,14 @@ public class MovieCursorHelper {
             return isFav;
         }
         return 0;
+    }
+
+    public static String getMovieOverView(Cursor cursor) {
+        if (cursor != null){
+            return cursor.getString(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_OVERVIEW));
+        }
+        return null;
+
     }
 }

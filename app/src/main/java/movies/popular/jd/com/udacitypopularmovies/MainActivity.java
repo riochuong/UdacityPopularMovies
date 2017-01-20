@@ -1,6 +1,8 @@
 package movies.popular.jd.com.udacitypopularmovies;
 
 import android.app.Application;
+import android.app.IntentService;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (findViewById(R.id.movie_detail_container) != null){
+        if (isInTwoPane()){
             Log.d(TAG,"Activity is in two pane mode");
             mTwoPane = true;
 
@@ -37,10 +39,34 @@ public class MainActivity extends AppCompatActivity {
         //MovieListFragment mvListFragment = new MovieListFragment();
     }
 
+    public boolean isInTwoPane (){
+        return (this.findViewById(R.id.movie_detail_container) != null);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+
+
+
+    public void startMovieDetailView (Bundle mvInfoBundle){
+
+        if (mTwoPane){
+            // let's replace the old fragment
+            MovieDetailFragment mvFragment = new MovieDetailFragment();
+            mvFragment.setArguments(mvInfoBundle);
+            getSupportFragmentManager().beginTransaction().replace(
+                    R.id.movie_detail_container,mvFragment,MOVIE_DETAIL_FRAGMENT_TAG).commit();
+        }
+        else{
+            // otherwise start detail activity with data passed
+            Intent startDetailAct = new Intent(this,MovieDetailActivity.class);
+            startDetailAct.putExtras(mvInfoBundle);
+            startActivity(startDetailAct);
+        }
     }
 
     @Override

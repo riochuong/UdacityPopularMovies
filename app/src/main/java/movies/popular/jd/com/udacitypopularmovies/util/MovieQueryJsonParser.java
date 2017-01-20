@@ -34,8 +34,6 @@ public class MovieQueryJsonParser {
 
 
     public static final String YOUTUBE_TRAILERS = "youtube";
-    public static final String SOURCE = "source";
-
 
     public static final String TRAILER_NAME = "name";
     public static final String TRAILER_SIZE = "size";
@@ -158,7 +156,7 @@ public class MovieQueryJsonParser {
         List<MovieReview> movieReviews = new ArrayList<>();
         StringBuffer sb = new StringBuffer();
         JSONObject jobject = new JSONObject(json);
-        JSONArray jArr = jobject.getJSONArray(YOUTUBE_TRAILERS);
+        JSONArray jArr = jobject.getJSONArray(RESULTS);
 
 
         // put all trailers youtube link to the return list

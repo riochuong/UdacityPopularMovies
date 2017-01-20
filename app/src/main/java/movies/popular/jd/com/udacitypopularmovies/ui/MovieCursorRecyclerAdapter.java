@@ -1,23 +1,26 @@
-package movies.popular.jd.com.udacitypopularmovies;
+package movies.popular.jd.com.udacitypopularmovies.ui;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DataSetObserver;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
-import java.util.List;
 
+import movies.popular.jd.com.udacitypopularmovies.MainActivity;
+import movies.popular.jd.com.udacitypopularmovies.R;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
@@ -74,14 +77,21 @@ public class MovieCursorRecyclerAdapter extends
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public MovieItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         View movieItemView =
-                LayoutInflater.from(mContext).inflate(R.layout.list_item_layout, parent, false);
-
+                LayoutInflater.from(mContext).inflate(R.layout.movie_list_item_layout, parent, false);
+        View movieDetailFragment = parent.findViewById(R.id.movie_detail_fragment);
+       // movieItemView.setLayoutParams(getRecylcerViewLayoutParams(movieDetailFragment));
         return new MovieItemViewHolder(movieItemView);
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+    private ViewGroup.LayoutParams getRecylcerViewLayoutParams(View view){
+        return new ViewGroup.LayoutParams(view.getWidth(),view.getWidth());
     }
 
     @Override
@@ -102,28 +112,50 @@ public class MovieCursorRecyclerAdapter extends
         String movieId = cursor.getString(
             cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID)
         );
+        // set item view on Click listener
+        holder.itemView.setOnClickListener(new MovieDetailOnClickListener(
+                MovieTaskHelper.buildBundleForDetailActivity(cursor)
+        ));
+
         holder.mMovieName.setText(
-                cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE)));
-        holder.mPopular.setText(
-                cursor.getDouble(
-                        cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POPULARITY)) + "");
+                MovieCursorHelper.getMovieNameFromCursor(cursor));
         holder.mRating.setText(
-                cursor.getDouble(
-                        cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE)) + "");
+                MovieCursorHelper.getMovieRatingFromCursor(cursor));
 
         // set correct favorite listener when user click on the star icon
         boolean isFav = (mFavMoviesMap.get(movieId) > 0);
-        holder.mFavStar.setChecked(isFav);
-        holder.mFavStar.setOnClickListener(new OnFavSelectListener(movieId, isFav, position));
+        holder.setFavBtn(isFav);
 
-        String posterPath = cursor.getString(
-            cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER_PATH)
-        );
+        holder.mFavStar.setOnClickListener(new OnFavSelectListener(movieId, isFav, holder));
+        // get poster path to prepare for loading image
+        String posterPath = MovieCursorHelper.getMoviePosterPath(cursor);
 
         // use picasso to load image to image view
         Picasso.with(mContext).
                 load(MovieTaskHelper.buildMovieIconUrl(posterPath))
                 .into(holder.mImgView);
+    }
+
+
+
+
+    /**
+     * each movie view will have its own listener
+     * so it can launch the movie detail view when needed
+     */
+    private class MovieDetailOnClickListener implements View.OnClickListener{
+
+        Bundle mInfoBundle;
+
+        public MovieDetailOnClickListener(Bundle mInfoBundle) {
+            this.mInfoBundle = mInfoBundle;
+        }
+
+        @Override
+        public void onClick(View view) {
+            // call the fragment activity
+            ((MainActivity)mContext).startMovieDetailView(mInfoBundle);
+        }
     }
 
     /**
@@ -132,37 +164,31 @@ public class MovieCursorRecyclerAdapter extends
     private class OnFavSelectListener implements View.OnClickListener {
         private String mMovideId;
         private boolean mChecked;
-        private int mPosition;
-        public OnFavSelectListener(String movieId, boolean checked, int pos) {
+        private MovieItemViewHolder mHolder;
+        public OnFavSelectListener(String movieId, boolean checked ,MovieItemViewHolder holder) {
             mMovideId = movieId;
             mChecked = checked;
-            mPosition = pos;
+            mHolder = holder;
         }
 
         @Override
         public void onClick(View view) {
             // due to onChecked bug...need to do a cast for checking here
-            boolean isChecked = ((CheckBox)view).isChecked();
+            mChecked = !mChecked; // toggling check
 
             // only needs to modify the db if there is a change
-            if (isChecked != mChecked){
-                ContentValues cv = new ContentValues();
-                cv.put(MovieContract.MovieEntry.COLUMN_FAVORITE, (isChecked ? 1 : 0));
-                // update hashmap and database to keep data consistent
-                mFavMoviesMap.put(mMovideId,(isChecked ? 1 : 0));
-                MovieCursorRecyclerAdapter.this.mContext.getContentResolver()
+            ContentValues cv = new ContentValues();
+            cv.put(MovieContract.MovieEntry.COLUMN_FAVORITE, (mChecked ? 1 : 0));
+            mHolder.setFavBtn(mChecked);
+            // update hashmap and database to keep data consistent
+            mFavMoviesMap.put(mMovideId,(mChecked ? 1 : 0));
+            MovieCursorRecyclerAdapter.this.mContext.getContentResolver()
                         .update(
                                 MovieContract.MovieEntry.buildMovieFavUpdateUri(mMovideId),
                                 cv,
                                 MovieContract.MovieEntry.COLUMN_MOVIE_ID + "= ?",
                                 new String[]{mMovideId}
                         );
-                mChecked = isChecked;
-                // we do not need to notify the dataset changed here
-                // because we dont want to change the cursor
-                notifyItemChanged(mPosition);
-            }
-
         }
     }
 
@@ -223,16 +249,33 @@ public class MovieCursorRecyclerAdapter extends
         ImageView mImgView;
         TextView mMovieName;
         TextView mRating;
-        TextView mPopular;
-        CheckBox mFavStar;
+        ImageButton mFavStar;
 
         public MovieItemViewHolder(View itemView) {
             super(itemView);
             mImgView = (ImageView) itemView.findViewById(R.id.movie_image);
             mMovieName = (TextView) itemView.findViewById(R.id.movie_name);
             mRating = (TextView) itemView.findViewById(R.id.movie_rating);
-            mPopular = (TextView) itemView.findViewById(R.id.movie_popular);
-            mFavStar = (CheckBox) itemView.findViewById(R.id.fav_star);
+            mFavStar = (ImageButton) itemView.findViewById(R.id.fav_star);
+        }
+
+        /**
+         * help to change button img based on fav or not
+         * @param isFav
+         */
+        public void setFavBtn(boolean isFav){
+            if (isFav){
+                mFavStar.setImageResource(R.drawable.heart_fav);
+                mFavStar.setTag(R.drawable.heart_fav);
+            }
+            else{
+                mFavStar.setImageResource(R.drawable.heart_non_fav);
+                mFavStar.setTag(R.drawable.heart_non_fav);
+            }
+        }
+
+        public boolean isFavSelected (){
+            return (mFavStar.getTag() != null && (int)mFavStar.getTag() == R.drawable.heart_fav);
         }
     }
 

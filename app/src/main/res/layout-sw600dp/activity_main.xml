@@ -2,13 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="horizontal"
               android:layout_width="match_parent"
+              android:id="@+id/two_pane_layout"
+              android:tag="two-pane"
               android:layout_height="match_parent">
 
 
     <fragment
         android:id="@+id/movie_list_fragment"
         android:layout_width="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:layout_height="match_parent"
         android:name="movies.popular.jd.com.udacitypopularmovies.MovieListFragment"
         />
@@ -16,7 +18,7 @@
     <FrameLayout
         android:id="@+id/movie_detail_container"
         android:layout_width="0dp"
-        android:layout_weight="4"
+        android:layout_weight="2"
         android:layout_height="match_parent"
         />
 

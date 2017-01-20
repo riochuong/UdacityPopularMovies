@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+    android:layout_margin="@dimen/icon_big_margin">
+    <!--Trailer Icon-->
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_gravity="left"
+        android:gravity="left"
+        android:text="@string/Trailers"
+        android:textAppearance="?android:textAppearanceLarge"
+        android:textStyle="italic|bold"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

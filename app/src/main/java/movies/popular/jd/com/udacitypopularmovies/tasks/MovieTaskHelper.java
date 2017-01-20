@@ -1,6 +1,8 @@
 package movies.popular.jd.com.udacitypopularmovies.tasks;
 
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -8,10 +10,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import movies.popular.jd.com.udacitypopularmovies.BuildConfig;
+import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 
 /**
  * Created by chuondao on 1/14/17.
@@ -41,7 +43,7 @@ public class MovieTaskHelper {
      * @return
      */
     public static Uri buildMovieTrailersRequestUrl(String movideId) {
-        String baseQuery = BASE_QUERY + "/" + movideId + "/trailers";
+        String baseQuery = BASE_QUERY + "/movie" +"/"+ movideId + "/trailers";
         return Uri.parse(baseQuery).buildUpon()
                 .appendQueryParameter("api_key", API_KEY)
                 .build();
@@ -66,7 +68,7 @@ public class MovieTaskHelper {
      * @return
      */
     public static Uri buildMovieReviewsRequestUrl(String movideId) {
-        String baseQuery = BASE_QUERY + "/" + movideId + "/reviews";
+        String baseQuery = BASE_QUERY + "/movie" +"/" + movideId + "/reviews";
         return Uri.parse(baseQuery).buildUpon()
                 .appendQueryParameter("api_key", API_KEY)
                 .build();
@@ -138,6 +140,35 @@ public class MovieTaskHelper {
         }
         Log.e(TAG,"Failed to fetch data from Input stream reader");
         return null;
+    }
+
+
+    public static Bundle buildBundleForDetailActivity(Cursor cursor){
+
+        Bundle bundle = new Bundle();
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_TITLE,
+                            MovieCursorHelper.getMovieNameFromCursor(cursor));
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+                MovieCursorHelper.getMovieIdFromCursor(cursor));
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+                MovieCursorHelper.getMovieReleaseDateFromCursor(cursor));
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_POPULARITY,
+                MovieCursorHelper.getMoviePopluarityFromCursor(cursor));
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_VOTE_AVG,
+                MovieCursorHelper.getMovieRatingFromCursor(cursor));
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+                MovieCursorHelper.getMoviePosterPath(cursor));
+
+        bundle.putString(MovieContract.MovieEntry.COLUMN_OVERVIEW,
+                MovieCursorHelper.getMovieOverView(cursor));
+
+        return bundle;
     }
 
 }

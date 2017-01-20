@@ -1,6 +1,8 @@
 package movies.popular.jd.com.udacitypopularmovies;
 
+import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -8,15 +10,17 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
+import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieListTask;
-import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
+import movies.popular.jd.com.udacitypopularmovies.ui.MovieCursorRecyclerAdapter;
 
 
 /**
@@ -50,25 +54,68 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_movie_list, container, false);
 
-        // setup Recycler view
-        setupRecyclerView(rootView);
+        // calculate number of columns should be fitted
+        rootView.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                // accomodate deprecated API
+                if (Build.VERSION.SDK_INT<16){
+                    rootView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                }
+                else{
+                    rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
+
+                int col = getCollumnSpanSize(rootView);
+                setupRecyclerView(rootView,col);
+            }
+        });
 
         return rootView;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
     }
 
     /**
      * Helper used to setup recycler view 
      * @param rootLayout
      */
-    private void setupRecyclerView(View rootLayout){
+    private void setupRecyclerView(View rootLayout, int colSpan){
         RecyclerView recView = (RecyclerView) rootLayout.findViewById(R.id.recyclerview);
-        mLayoutManager = new GridLayoutManager(getContext(),GRID_SPAN);
+
         mAdapter = new MovieCursorRecyclerAdapter(this.getContext(), mCursor);
+        mLayoutManager = new GridLayoutManager(getContext(),colSpan);
         recView.setLayoutManager(mLayoutManager);
+
+        recView.setHasFixedSize(true);
         recView.setAdapter(mAdapter);
     }
+
+    private int getCollumnSpanSize (View rootView){
+        // doing some math here to calculate span
+        WindowManager wm = (WindowManager)
+                getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        double density = metrics.density;
+        double widthDp = rootView.getWidth() / density;
+
+        double cellWidth =
+                getContext().getResources().getDimension(R.dimen.card_view_width) / density;
+
+        return (int) Math.round(widthDp / cellWidth);
+
+    }
+
+
+
 
     /**
      * this called from MainActivity to change the
@@ -95,6 +142,14 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
 
         }
 
+    }
+
+    /**
+     * call mainactivity to determine
+     * if we created new fragment or start new activity
+     */
+    public void OnMovieSelected (Bundle mvInfoBundle){
+        ((MainActivity)getActivity()).startMovieDetailView(mvInfoBundle);
     }
 
 

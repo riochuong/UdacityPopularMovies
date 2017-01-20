@@ -7,4 +7,9 @@
     <string name="favorite">favorites</string>
     <string name="top_rated">top rated</string>
     <string name="content_authority">movies.popular.jd.com.udacitypopularmovies</string>
+    <string name="Plot">Plot</string>
+    <string name="Trailers">Trailers</string>
+    <string name="Reviews">Reviews</string>
+    <string name="more_trailers">More Trailers</string>
+    <string name="reivews">Reviews</string>
 </resources>
