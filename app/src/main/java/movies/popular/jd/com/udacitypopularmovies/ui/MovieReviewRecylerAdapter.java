@@ -1,6 +1,7 @@
 package movies.popular.jd.com.udacitypopularmovies.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -51,7 +52,7 @@ public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
         mMovieInfo = info;
         // to the next available spot
         mReviewHeaderPosition = MOVIE_TRAILER_HEADER_POSITION +
-                ((mMovieReviewList == null) ? 1 : (mMovieReviewList.size() + 1));
+                ((movieTrailerList == null) ? 1 : (movieTrailerList.size() + 1));
 
 
     }
@@ -60,7 +61,7 @@ public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v;
 
-        if (viewType < 0){
+        if (viewType < 0 || viewType > getItemCount()){
             Log.e(TAG, "Error inflate view here ");
             return null;
         }
@@ -99,9 +100,13 @@ public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
                 // inflate movie trailers
                 v = LayoutInflater.from(mContext)
                         .inflate(R.layout.movie_trailer_item_layout, parent, false);
-                return new MovieTrailerHolder(v);
+                // need to know trailer index so we can get the trailer link
+                // in order to set the onClickListener
+                int trailIndex = viewType - (MOVIE_TRAILER_HEADER_POSITION + 1);
+                return new MovieTrailerHolder(v, mMovieTrailerList.get(trailIndex).getSource());
         }
     }
+
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -216,9 +221,20 @@ public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
     private class MovieTrailerHolder extends RecyclerView.ViewHolder {
         TextView mTrailerTitle;
 
-        public MovieTrailerHolder(View itemView) {
+        public MovieTrailerHolder(View itemView, final String source) {
             super(itemView);
             mTrailerTitle = (TextView) itemView.findViewById(R.id.trailer_title);
+            // set on click listener to play youtube videos.
+            itemView.setClickable(true);
+            itemView.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                                Intent intent = MovieTaskHelper.buildYoutubeIntend(source);
+                                mContext.startActivity(intent);
+                        }
+                    }
+            );
         }
     }
 

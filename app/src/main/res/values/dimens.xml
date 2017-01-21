@@ -12,9 +12,14 @@
     <dimen name="card_view_height">300dp</dimen>
     <dimen name="card_img_height">220dp</dimen>
     <dimen name="overlap_movie_info">100dp</dimen>
-    <dimen name="movie_detail_info_height">300dp</dimen>
+    <dimen name="movie_detail_info_height">160dp</dimen>
+    <dimen name="movie_detail_info_parent">220dp</dimen>
     <dimen name="movie_over_view_height">100dp</dimen>
     <dimen name="movie_detail_img_height">200dp</dimen>
     <dimen name="movie_detail_img_width">120dp</dimen>
+    <dimen name="comment_seperator_thickness">2dp</dimen>
+    <dimen name="app_bar_layout_size">200dp</dimen>
+    <dimen name="play_button_width">60dp</dimen>
+    <dimen name="play_button_height">60dp</dimen>
 
 </resources>

@@ -2,12 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_margin="@dimen/icon_big_margin"
               android:layout_height="wrap_content">
     <!--Trailer Icon-->
 
+    <!--Trailer Icon-->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_margin="0dp"
+        android:background="@color/colorGray"
+        android:layout_height="1dp"/>
+
     <TextView
         android:layout_width="match_parent"
+        android:layout_margin="@dimen/icon_big_margin"
         android:layout_gravity="left"
         android:gravity="left"
         android:text="@string/Reviews"

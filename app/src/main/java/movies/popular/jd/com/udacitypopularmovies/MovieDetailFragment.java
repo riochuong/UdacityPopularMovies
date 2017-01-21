@@ -1,5 +1,6 @@
 package movies.popular.jd.com.udacitypopularmovies;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -24,6 +25,7 @@ import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieDetailsLoaderT
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieDetailLoaderInfo;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
 import movies.popular.jd.com.udacitypopularmovies.ui.MovieReviewRecylerAdapter;
+import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
 
 
 /**
@@ -35,7 +37,8 @@ public class MovieDetailFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<MovieDetailLoaderInfo> {
 
     @BindView(R.id.all_views_recycler_view) RecyclerView mHomeView;
-
+    @BindView(R.id.trailer_img) ImageView mTrailerImg;
+    @BindView(R.id.play_trailer_button) ImageView mPlayTrailerBtn;
     private static final int MOVIE_DETAIL_LOADER = 1;
 
     public MovieDetailFragment() {
@@ -99,10 +102,15 @@ public class MovieDetailFragment extends Fragment implements
         // now we can bind the data
         if (data != null)
         {
-           mHomeView.setAdapter(
+            mHomeView.setAdapter(
                    new MovieReviewRecylerAdapter(getContext(),
                            data.getmReviewList(),
                            data.getmTrailerList(),this.getArguments()));
+
+            // official trailer most of the time is at the first position
+            MovieTrailer officialTrailer = (data.getmTrailerList() != null )?
+                                                          data.getmTrailerList().get(0) : null;
+            setMovieTrailerImg(officialTrailer);
         }
 
     }
@@ -110,5 +118,31 @@ public class MovieDetailFragment extends Fragment implements
     @Override
     public void onLoaderReset(Loader<MovieDetailLoaderInfo> loader) {
 
+    }
+
+    /**
+     * set the thumbnail image for movie trailer
+     */
+    private void setMovieTrailerImg(final MovieTrailer officialTrailer){
+        // use picasso to load image to view
+        if (officialTrailer != null){
+            Picasso.with(getContext()).
+                    load(MovieTaskHelper
+                            .buildYoutubeThumbnailRequestUrl(officialTrailer.getSource()))
+                    .into(mTrailerImg);
+
+            // set only click listener to launch youtube
+            mPlayTrailerBtn.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // build and launch trailer with youtube.
+                            Intent launchYoutube = MovieTaskHelper
+                                    .buildYoutubeIntend(officialTrailer.getSource());
+                            getContext().startActivity(launchYoutube);
+                        }
+                    }
+            );
+        }
     }
 }

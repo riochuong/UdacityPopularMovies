@@ -1,5 +1,6 @@
 package movies.popular.jd.com.udacitypopularmovies.tasks;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,6 +37,12 @@ public class MovieTaskHelper {
 
     public static final String TOP_RATED_CHOICE = "top_rated";
 
+    public static final String YOUTUBE_VIDEO_THUMBNAIL =
+            "http://img.youtube.com/vi/%s/hqdefault.jpg";
+
+    public static final String YOUTUBE_WATCH_URL_BASE =
+            "http://www.youtube.com/watch?v=%s";
+
     /**
      * build movie URLS request for specific movie trailers
      *
@@ -48,6 +55,43 @@ public class MovieTaskHelper {
                 .appendQueryParameter("api_key", API_KEY)
                 .build();
 
+    }
+
+    /**
+     * build youtube intent for launching trailer
+     * @param link
+     * @return
+     */
+    public static Intent buildYoutubeIntend(String link){
+
+        if (link == null){
+            return null;
+        }
+
+        Intent launchYoutube = new Intent();
+        launchYoutube.setAction(Intent.ACTION_VIEW);
+        launchYoutube.setData(buildYoutubeWatchUrl(link));
+        return launchYoutube;
+    }
+
+    /**
+     * build Url show we can launch youtube app
+     * @param link
+     * @return
+     */
+    public static Uri buildYoutubeWatchUrl(String link){
+        String baseQuery = String.format(YOUTUBE_WATCH_URL_BASE,link);
+        return Uri.parse(baseQuery).buildUpon().build();
+    }
+
+    /**
+     * Construct the url to request thumbnail image from youtube.
+     * @param movieId
+     * @return
+     */
+    public static Uri buildYoutubeThumbnailRequestUrl(String movieId){
+        String baseQuery = String.format(YOUTUBE_VIDEO_THUMBNAIL, movieId);
+        return Uri.parse(baseQuery).buildUpon().build();
     }
 
     /**
