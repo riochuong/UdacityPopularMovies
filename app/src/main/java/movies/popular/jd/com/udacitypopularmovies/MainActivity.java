@@ -3,6 +3,7 @@ package movies.popular.jd.com.udacitypopularmovies;
 import android.app.Application;
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,18 +11,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieListTask;
+import movies.popular.jd.com.udacitypopularmovies.util.SharedPreferenceHelper;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String MOVIE_DETAIL_FRAGMENT_TAG = "MVDETAIL_TAG";
     private boolean mTwoPane = false;
+    private SharedPreferences mSharedPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        mSharedPrefs = getSharedPreferences(SharedPreferenceHelper.MY_SHARED_PREFS, MODE_PRIVATE);
         if (isInTwoPane()){
             Log.d(TAG,"Activity is in two pane mode");
             mTwoPane = true;

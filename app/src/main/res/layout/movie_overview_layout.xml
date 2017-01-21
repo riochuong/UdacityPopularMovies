@@ -7,7 +7,7 @@
     <!--Trailer Icon-->
     <TextView
         android:layout_width="wrap_content"
-        android:text="@string/Plot"
+        android:text="@string/plot_title"
         android:layout_marginBottom="@dimen/icon_small_margin"
         android:textStyle="bold"
         android:textAppearance="?android:textAppearanceLarge"

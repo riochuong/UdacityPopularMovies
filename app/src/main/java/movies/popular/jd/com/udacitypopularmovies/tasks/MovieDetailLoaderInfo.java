@@ -16,6 +16,7 @@ public class MovieDetailLoaderInfo {
     public MovieDetailLoaderInfo(List<MovieReview> mReviewList, List<MovieTrailer> mTrailerList) {
         this.mReviewList = mReviewList;
         this.mTrailerList = mTrailerList;
+
     }
 
     public List<MovieReview> getmReviewList() {
@@ -25,4 +26,6 @@ public class MovieDetailLoaderInfo {
     public List<MovieTrailer> getmTrailerList() {
         return mTrailerList;
     }
+
+
 }

@@ -184,7 +184,6 @@ public class MovieProvider  extends ContentProvider{
                 getContext().getContentResolver().notifyChange(uri,null);
                 return rowCount;
             case MOVIE_ITEM_FAV_UPDATE:
-
                 rowCount =
                         db.update(MovieContract.MovieEntry.TABLE_NAME, contentValues, s , strings);
                 getContext().getContentResolver().notifyChange(uri,null);

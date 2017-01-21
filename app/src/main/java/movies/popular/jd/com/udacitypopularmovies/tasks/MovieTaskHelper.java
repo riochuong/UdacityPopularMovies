@@ -187,9 +187,12 @@ public class MovieTaskHelper {
     }
 
 
+
+
     public static Bundle buildBundleForDetailActivity(Cursor cursor){
 
         Bundle bundle = new Bundle();
+
 
         bundle.putString(MovieContract.MovieEntry.COLUMN_TITLE,
                             MovieCursorHelper.getMovieNameFromCursor(cursor));

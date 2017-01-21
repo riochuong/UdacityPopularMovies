@@ -15,7 +15,7 @@
         android:layout_margin="@dimen/icon_big_margin"
         android:layout_gravity="left"
         android:gravity="left"
-        android:text="@string/Trailers"
+        android:text="@string/more_trailers_title"
         android:textAppearance="?android:textAppearanceLarge"
         android:textStyle="italic|bold"
         android:layout_marginRight="@dimen/activity_horizontal_margin"

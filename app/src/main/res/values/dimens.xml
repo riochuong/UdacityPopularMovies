@@ -21,5 +21,8 @@
     <dimen name="app_bar_layout_size">200dp</dimen>
     <dimen name="play_button_width">60dp</dimen>
     <dimen name="play_button_height">60dp</dimen>
+    <dimen name="review_margin">5dp</dimen>
+    <dimen name="fab_elevation">20dp</dimen>
+    <dimen name="fab_button_size">60dp</dimen>
 
 </resources>

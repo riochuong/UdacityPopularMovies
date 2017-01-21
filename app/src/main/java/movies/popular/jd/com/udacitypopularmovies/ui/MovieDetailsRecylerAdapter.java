@@ -28,7 +28,7 @@ import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
  * Created by chuondao on 1/19/17.
  */
 
-public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
+public class MovieDetailsRecylerAdapter extends RecyclerView.Adapter {
 
     private List<MovieReview> mMovieReviewList;
     private static final  String TAG = "MOVIE_RECYCLER_ADAPTER";
@@ -39,12 +39,13 @@ public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
     private static final int MOVIE_INFO_POSITION = 0;
     private static final int MOVIE_OVERVIEW_POSITION = 1;
     private static final int MOVIE_TRAILER_HEADER_POSITION = 2;
+    private static final int NUMBER_OF_STATIC_VIEWS = 4;
     private Bundle mMovieInfo;
 
-    public MovieReviewRecylerAdapter(Context ctx,
-                                     List<MovieReview> movieReviewList,
-                                     List<MovieTrailer> movieTrailerList,
-                                     Bundle info) {
+    public MovieDetailsRecylerAdapter(Context ctx,
+                                      List<MovieReview> movieReviewList,
+                                      List<MovieTrailer> movieTrailerList,
+                                      Bundle info) {
 
         this.mMovieTrailerList = movieTrailerList;
         this.mMovieReviewList = movieReviewList;
@@ -176,9 +177,10 @@ public class MovieReviewRecylerAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
+        // item count equals all views + number of trailers + number of reviews
         int totalItem = (mMovieReviewList != null) ? mMovieReviewList.size() : 0;
         totalItem += (mMovieTrailerList != null) ? mMovieTrailerList.size() : 0;
-        return (totalItem + 4);
+        return (totalItem + NUMBER_OF_STATIC_VIEWS);
     }
 
 

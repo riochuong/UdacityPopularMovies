@@ -2,10 +2,13 @@ package movies.popular.jd.com.udacitypopularmovies.ui;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.ContentObservable;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -77,7 +80,7 @@ public class MovieCursorRecyclerAdapter extends
         }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
+
     @Override
     public MovieItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -87,11 +90,6 @@ public class MovieCursorRecyclerAdapter extends
        // movieItemView.setLayoutParams(getRecylcerViewLayoutParams(movieDetailFragment));
         return new MovieItemViewHolder(movieItemView);
 
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
-    private ViewGroup.LayoutParams getRecylcerViewLayoutParams(View view){
-        return new ViewGroup.LayoutParams(view.getWidth(),view.getWidth());
     }
 
     @Override
@@ -114,8 +112,8 @@ public class MovieCursorRecyclerAdapter extends
         );
         // set item view on Click listener
         holder.itemView.setOnClickListener(new MovieDetailOnClickListener(
-                MovieTaskHelper.buildBundleForDetailActivity(cursor)
-        ));
+                MovieTaskHelper.buildBundleForDetailActivity(cursor)));
+
 
         holder.mMovieName.setText(
                 MovieCursorHelper.getMovieNameFromCursor(cursor));
@@ -146,14 +144,15 @@ public class MovieCursorRecyclerAdapter extends
     private class MovieDetailOnClickListener implements View.OnClickListener{
 
         Bundle mInfoBundle;
+        int position;
 
         public MovieDetailOnClickListener(Bundle mInfoBundle) {
+
             this.mInfoBundle = mInfoBundle;
         }
 
         @Override
         public void onClick(View view) {
-            // call the fragment activity
             ((MainActivity)mContext).startMovieDetailView(mInfoBundle);
         }
     }
@@ -198,6 +197,7 @@ public class MovieCursorRecyclerAdapter extends
      * @param newCursor
      */
     public void swapCursor(Cursor newCursor) {
+
         if (newCursor == mCursor) {
             return;
         }
@@ -209,6 +209,8 @@ public class MovieCursorRecyclerAdapter extends
 
         if (newCursor != null) {
             mCursor = newCursor;
+            mCursor.setNotificationUri(mContext.getContentResolver(),
+                    MovieContract.MovieEntry.CONTENT_URI);
             mCursor.registerDataSetObserver(mDataChangeObserver);
             mDataValid = true;
             // initialize fav movies hashmap here
@@ -275,7 +277,7 @@ public class MovieCursorRecyclerAdapter extends
         }
 
         public boolean isFavSelected (){
-            return (mFavStar.getTag() != null && (int)mFavStar.getTag() == R.drawable.heart_fav);
+            return (mFavStar.getTag() != null) && ((int)mFavStar.getTag() == R.drawable.heart_fav);
         }
     }
 
@@ -299,4 +301,6 @@ public class MovieCursorRecyclerAdapter extends
             notifyDataSetChanged();
         }
     }
+
+
 }

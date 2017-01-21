@@ -1,5 +1,6 @@
 package movies.popular.jd.com.udacitypopularmovies.tasks;
 
+import android.database.Cursor;
 import android.support.v4.content.AsyncTaskLoader;
 import android.content.Context;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.util.List;
 
+import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieQueryJsonParser;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieReview;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
@@ -44,6 +46,9 @@ public class FetchMovieDetailsLoaderTask
             // Obtain raw data from network call
             String reviewRawString = MovieTaskHelper.fetchHttpDataMovie(reviewUri);
             String trailerRawString = MovieTaskHelper.fetchHttpDataMovie(trailerUri);
+            Uri specificMovieQuery = MovieContract.MovieEntry.
+                    buildMovieListUri(Integer.parseInt(mMoviedId));
+
 
             // Parse raw json and construct the result to be used for displaying data
             MovieDetailLoaderInfo result =

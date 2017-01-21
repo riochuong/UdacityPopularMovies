@@ -2,6 +2,7 @@ package movies.popular.jd.com.udacitypopularmovies;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -126,6 +127,8 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         Bundle bundle = new Bundle();
         switch(choice){
             case "favor":
+                bundle.putString("choice","favorite");
+                getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
                 break;
             case "top_rated":
                 FetchMovieListTask topRatedTask = new FetchMovieListTask(getContext());
@@ -144,14 +147,6 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
 
     }
 
-    /**
-     * call mainactivity to determine
-     * if we created new fragment or start new activity
-     */
-    public void OnMovieSelected (Bundle mvInfoBundle){
-        ((MainActivity)getActivity()).startMovieDetailView(mvInfoBundle);
-    }
-
 
     //************ LOADER CALL BACKS ******************************
     @Override
@@ -159,19 +154,26 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
 
         String choice = args.getString("choice");
         String sortOrder = " DESC";
+        Uri uri = MovieContract.MovieEntry.CONTENT_URI;
+        String selection = null;
+        String [] selectionArsg = null;
         if (choice.equalsIgnoreCase("top_rated")){
             sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVG + sortOrder;
         }
-        else{
+        else if (choice.equalsIgnoreCase("popular")){
             sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + sortOrder;
+        }else{
+            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + sortOrder;
+            selection = MovieContract.MovieEntry.COLUMN_FAVORITE+"=?";
+            selectionArsg = new String[]{"1"};
         }
 
         return new CursorLoader(
                 getContext(),
                 MovieContract.MovieEntry.CONTENT_URI,
                 null,
-                null,
-                null,
+                selection,
+                selectionArsg,
                 sortOrder);
 
     }
@@ -184,7 +186,8 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoaderReset(Loader loader) {
-
+        // set cursor to null when data becomes invalid
+        mAdapter.swapCursor(null);
     }
 
 }
