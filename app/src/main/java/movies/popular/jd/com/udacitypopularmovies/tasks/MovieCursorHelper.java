@@ -90,4 +90,22 @@ public class MovieCursorHelper {
         return null;
 
     }
+
+    public static String getMovieReviewFromCursor(Cursor cursor) {
+        if (cursor != null){
+            return cursor.getString(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_REVIEW));
+        }
+        return null;
+
+    }
+
+    public static String getMovieTrailerFromCursor(Cursor cursor) {
+        if (cursor != null){
+            return cursor.getString(
+                    cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TRAILER));
+        }
+        return null;
+
+    }
 }

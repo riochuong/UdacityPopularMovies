@@ -219,6 +219,9 @@ public class MovieTaskHelper {
         bundle.putString(MovieContract.MovieEntry.COLUMN_POPULARITY,
                 MovieCursorHelper.getMoviePopluarityFromCursor(cursor));
 
+        bundle.putBoolean(MovieContract.MovieEntry.COLUMN_FAVORITE,
+                MovieCursorHelper.getMovieFavorField(cursor) > 0);
+
         bundle.putString(MovieContract.MovieEntry.COLUMN_VOTE_AVG,
                 MovieCursorHelper.getMovieRatingFromCursor(cursor));
 

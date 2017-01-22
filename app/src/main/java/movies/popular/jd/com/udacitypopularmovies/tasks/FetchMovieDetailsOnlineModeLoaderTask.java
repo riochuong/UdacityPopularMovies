@@ -22,12 +22,12 @@ import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
  *
  */
 
-public class FetchMovieDetailsLoaderTask
+public class FetchMovieDetailsOnlineModeLoaderTask
         extends AsyncTaskLoader<MovieDetailLoaderInfo> {
 
     String mMoviedId;
     private  static final String TAG = "FetchMovieDetailTask";
-    public FetchMovieDetailsLoaderTask(Context context, String movieId) {
+    public FetchMovieDetailsOnlineModeLoaderTask(Context context, String movieId) {
         super(context);
         mMoviedId = movieId;
     }
@@ -54,10 +54,9 @@ public class FetchMovieDetailsLoaderTask
             MovieDetailLoaderInfo result =
                 new MovieDetailLoaderInfo(
                   MovieQueryJsonParser.parseMovieReviews(reviewRawString, mMoviedId),
-                  MovieQueryJsonParser.parseMovieTrailers(trailerRawString,mMoviedId)
-                );
-            return result;
+                  MovieQueryJsonParser.parseMovieTrailers(trailerRawString,mMoviedId));
 
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(TAG,"IO error during fetch movie details");

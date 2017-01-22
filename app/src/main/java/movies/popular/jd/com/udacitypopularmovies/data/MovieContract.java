@@ -53,6 +53,8 @@ public class MovieContract {
         public static final String COLUMN_FAVORITE = "favor";
         public static final String COLUMN_POSTER_PATH = "poster_path";
         public static final String COLUMN_IMAGE = "image";
+        public static final String COLUMN_REVIEW = "review";
+        public static final String COLUMN_TRAILER = "trailer";
 
         /* Query all movies */
         public static Uri buildMovieListUri(long id){

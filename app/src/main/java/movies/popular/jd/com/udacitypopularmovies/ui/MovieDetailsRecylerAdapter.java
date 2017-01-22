@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -23,6 +24,8 @@ import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieReview;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
+import movies.popular.jd.com.udacitypopularmovies.util.NetworkHelper;
+import movies.popular.jd.com.udacitypopularmovies.util.StorageHelper;
 
 /**
  * Created by chuondao on 1/19/17.
@@ -170,7 +173,19 @@ public class MovieDetailsRecylerAdapter extends RecyclerView.Adapter {
                     .buildMovieIconUrl(
                             mMovieInfo.getString(MovieContract.MovieEntry.COLUMN_POSTER_PATH));
 
-            Picasso.with(mContext).load(imageRequestUri).into(vh.mMovieImage);
+            if (NetworkHelper.isConnectToInternet(mContext)){
+                // fetch normally from network
+                Picasso.with(mContext).load(imageRequestUri).into(vh.mMovieImage);
+                vh.mMovieImage.setDrawingCacheEnabled(true);
+            } else{
+                // if it's get in here ...sure it's fav movies otherwise this view will
+                // be disable
+                File imgFile = StorageHelper.getPathToLoadFavImg(
+                        mMovieInfo.getString(MovieContract.MovieEntry.COLUMN_MOVIE_ID),
+                        mContext,
+                        StorageHelper.DISP_IMG);
+                Picasso.with(mContext).load(imgFile).into(vh.mMovieImage);
+            }
         }
 
     }

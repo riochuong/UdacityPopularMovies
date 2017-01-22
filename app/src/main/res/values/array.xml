@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="menu_items">
+        <item>Popular Movies</item>
+        <item>Top Rated Movies</item>
+        <item>Favorite Movies</item>
+    </string-array>
+</resources>

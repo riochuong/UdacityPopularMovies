@@ -27,6 +27,7 @@ import movies.popular.jd.com.udacitypopularmovies.R;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
+import movies.popular.jd.com.udacitypopularmovies.util.SharedPreferenceHelper;
 
 /**
  * movie list Recycler adapter
@@ -40,7 +41,7 @@ public class MovieCursorRecyclerAdapter extends
     private Cursor mCursor;
     private boolean mDataValid;
     private Context mContext;
-
+    private int mSortCriteria;
     // important to have the data oberver incase the
     // cursor data is changed outside of the app.
     private DataChangeObserver mDataChangeObserver;
@@ -56,6 +57,7 @@ public class MovieCursorRecyclerAdapter extends
         if (cursor != null) {
             cursor.registerDataSetObserver(mDataChangeObserver);
         }
+        mSortCriteria = SharedPreferenceHelper.getViewCriteriaFromPref(mContext);
 
     }
 
@@ -136,38 +138,6 @@ public class MovieCursorRecyclerAdapter extends
         }
     }
 
-    /**
-     * OnClick listener for checkbox favortie
-     */
-    private class OnFavSelectListener implements View.OnClickListener {
-        private String mMovideId;
-        private boolean mChecked;
-        private MovieItemViewHolder mHolder;
-        public OnFavSelectListener(String movieId, boolean checked ,MovieItemViewHolder holder) {
-            mMovideId = movieId;
-            mChecked = checked;
-            mHolder = holder;
-        }
-
-        @Override
-        public void onClick(View view) {
-            // due to onChecked bug...need to do a cast for checking here
-            mChecked = !mChecked; // toggling check
-
-            // only needs to modify the db if there is a change
-            ContentValues cv = new ContentValues();
-            cv.put(MovieContract.MovieEntry.COLUMN_FAVORITE, (mChecked ? 1 : 0));
-            mHolder.setFavBtn(mChecked);
-            // update hashmap and database to keep data consistent
-            MovieCursorRecyclerAdapter.this.mContext.getContentResolver()
-                        .update(
-                                MovieContract.MovieEntry.buildMovieFavUpdateUri(mMovideId),
-                                cv,
-                                MovieContract.MovieEntry.COLUMN_MOVIE_ID + "= ?",
-                                new String[]{mMovideId}
-                        );
-        }
-    }
 
     /**
      * swap new cursor in and return the old cursor

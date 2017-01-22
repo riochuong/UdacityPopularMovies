@@ -47,7 +47,6 @@ public class MovieListFragment extends Fragment implements
     MovieCursorRecyclerAdapter mAdapter = null;
     Cursor mCursor;
 
-
     // TODO: Rename and change types and number of parameters
     public static MovieListFragment newInstance(String param1, String param2) {
         MovieListFragment fragment = new MovieListFragment();
@@ -93,15 +92,15 @@ public class MovieListFragment extends Fragment implements
     }
 
 
-
-
     /**
      * force loader to reload data
      */
     public void onSelectionChange() {
         Bundle bundle = new Bundle();
+        // get the selection from shared prefs
         bundle.putInt(VIEW_CRITERIA,
                 SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
+        // force data reload here ...if fails ....set empty view instead
         if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
             setEmptyView();
         } else {
