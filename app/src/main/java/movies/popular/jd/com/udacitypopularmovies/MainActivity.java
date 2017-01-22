@@ -28,8 +28,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         if (isInTwoPane()){
             Log.d(TAG,"Activity is in two pane mode");
             mTwoPane = true;

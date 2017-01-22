@@ -47,7 +47,6 @@ public class MovieCursorRecyclerAdapter extends
 
     // to avoid keep querying db for fav. movies display
     // and to keep consistent data ..
-    HashMap<String,Integer> mFavMoviesMap;
 
     public MovieCursorRecyclerAdapter(Context ctx, Cursor cursor) {
         mContext = ctx;
@@ -57,27 +56,7 @@ public class MovieCursorRecyclerAdapter extends
         if (cursor != null) {
             cursor.registerDataSetObserver(mDataChangeObserver);
         }
-        initializeFavMoviesMap();
-    }
 
-    /**
-     * helper to initialize movie favs. hashmap whenever we
-     * swap the cursor.
-     */
-    private void initializeFavMoviesMap(){
-        if (mCursor == null)
-            return;
-        // discard all old data
-        mFavMoviesMap = new HashMap<>();
-        String movieId;
-        int isFav;
-        // traverse and add to hashmap if movies is favorite or not
-        for (int i = 0; i < mCursor.getCount() ; i++) {
-            mCursor.moveToPosition(i);
-            movieId = MovieCursorHelper.getMovieIdFromCursor(mCursor);
-            isFav = MovieCursorHelper.isMovieFavorite(mCursor);
-            mFavMoviesMap.put(movieId,isFav);
-        }
     }
 
 
@@ -121,10 +100,10 @@ public class MovieCursorRecyclerAdapter extends
                 MovieCursorHelper.getMovieRatingFromCursor(cursor));
 
         // set correct favorite listener when user click on the star icon
-        boolean isFav = (mFavMoviesMap.get(movieId) > 0);
-        holder.setFavBtn(isFav);
+        int isFav = MovieCursorHelper.getMovieFavorField(mCursor);
+        holder.setFavBtn(isFav > 0);
 
-        holder.mFavStar.setOnClickListener(new OnFavSelectListener(movieId, isFav, holder));
+        //holder.mFavStar.setOnClickListener(new OnFavSelectListener(movieId, isFav, holder));
         // get poster path to prepare for loading image
         String posterPath = MovieCursorHelper.getMoviePosterPath(cursor);
 
@@ -180,7 +159,6 @@ public class MovieCursorRecyclerAdapter extends
             cv.put(MovieContract.MovieEntry.COLUMN_FAVORITE, (mChecked ? 1 : 0));
             mHolder.setFavBtn(mChecked);
             // update hashmap and database to keep data consistent
-            mFavMoviesMap.put(mMovideId,(mChecked ? 1 : 0));
             MovieCursorRecyclerAdapter.this.mContext.getContentResolver()
                         .update(
                                 MovieContract.MovieEntry.buildMovieFavUpdateUri(mMovideId),
@@ -214,12 +192,10 @@ public class MovieCursorRecyclerAdapter extends
             mCursor.registerDataSetObserver(mDataChangeObserver);
             mDataValid = true;
             // initialize fav movies hashmap here
-            initializeFavMoviesMap();
             notifyDataSetChanged();
         } else {
             mDataValid = false;
             mCursor = null;
-            mFavMoviesMap = null;
             notifyDataSetChanged();
         }
     }

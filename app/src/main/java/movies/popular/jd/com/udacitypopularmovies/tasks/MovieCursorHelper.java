@@ -73,7 +73,7 @@ public class MovieCursorHelper {
      * @param cursor
      * @return
      */
-    public static int isMovieFavorite(Cursor cursor){
+    public static int getMovieFavorField(Cursor cursor){
         if (cursor != null){
             int isFav =  cursor.getInt(
                     cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVORITE));

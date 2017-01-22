@@ -80,7 +80,8 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
 
                         int col = getCollumnSpanSize(rootView);
                         setupRecyclerView(rootView, col);
-                        forceReloadData();
+                        initLoader();
+
                     }
                 });
         return rootView;
@@ -95,6 +96,13 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         bundle.putInt(VIEW_CRITERIA,
                 SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
         onSelectionChange(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
+    }
+
+    private void initLoader(){
+        Bundle bundle = new Bundle();
+        bundle.putInt(VIEW_CRITERIA,SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
+        getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle,
+                MovieListFragment.this);
     }
 
 
@@ -145,14 +153,12 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
                 bundle.putInt(VIEW_CRITERIA, FAVORITE_CRITERIA);
                 getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
                 break;
-
             case HIGHEST_RATED_CRITERIA:
                 FetchMovieListTask topRatedTask = new FetchMovieListTask(getContext());
                 topRatedTask.execute(MovieTaskHelper.TOP_RATED_STR);
                 bundle.putInt(VIEW_CRITERIA, MovieTaskHelper.HIGHEST_RATED_CRITERIA);
                 getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
                 break;
-
             case POPULAR_CRITERIA:
                 FetchMovieListTask popukarTask = new FetchMovieListTask(getContext());
                 popukarTask.execute(MovieTaskHelper.POPULAR_STR);
@@ -208,7 +214,11 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         if (data != null) {
             mCursor = data;
             mAdapter.swapCursor(mCursor);
+        }else{
+            // need to fetch from network as database does not have data
+            forceReloadData();
         }
+
     }
 
     @Override

@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -86,7 +85,8 @@ public class MovieDetailFragment extends Fragment {
         if (getMovieIdFromAgrs() != null) {
 
             mLoaderManager
-                    .restartLoader(MOVIE_DETAIL_LOADER, null, new MovieDetailsLoaderCallBacks())
+                    .restartLoader(MOVIE_DETAIL_LOADER, null,
+                            new MovieDetailsLoaderCallBacks())
                     .forceLoad();
 
 
@@ -293,7 +293,7 @@ public class MovieDetailFragment extends Fragment {
                             Long.parseLong(getMovieIdFromAgrs())
                     )
             );
-            boolean isFav = (MovieCursorHelper.isMovieFavorite(cursor) > 0);
+            boolean isFav = (MovieCursorHelper.getMovieFavorField(cursor) > 0);
             initializeFavButton(isFav);
         }
 
