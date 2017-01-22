@@ -9,8 +9,16 @@
 
     <!-- TODO: Update blank fragment layout -->
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview"
+        android:id="@+id/movie_list_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <TextView
+        android:id="@+id/movie_list_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:text="@string/no_data_available" />
 
 </RelativeLayout>

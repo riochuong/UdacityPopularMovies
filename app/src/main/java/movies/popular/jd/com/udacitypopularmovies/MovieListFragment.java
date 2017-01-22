@@ -3,9 +3,9 @@ package movies.popular.jd.com.udacitypopularmovies;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -20,11 +20,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieListTask;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
 import movies.popular.jd.com.udacitypopularmovies.ui.MovieCursorRecyclerAdapter;
+import movies.popular.jd.com.udacitypopularmovies.util.NetworkHelper;
 import movies.popular.jd.com.udacitypopularmovies.util.SharedPreferenceHelper;
 
 import static android.content.ContentValues.TAG;
@@ -37,10 +39,10 @@ import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.V
 /**
  *
  */
-public class MovieListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class MovieListFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int MOVIE_LIST_FRAGMENT_LOADER = 0;
-    private static final int GRID_SPAN = 2;
     GridLayoutManager mLayoutManager = null;
     MovieCursorRecyclerAdapter mAdapter = null;
     Cursor mCursor;
@@ -72,15 +74,18 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
                     @Override
                     public void onGlobalLayout() {
                         // accomodate deprecated API
-                        if (Build.VERSION.SDK_INT < 16) {
-                            rootView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        } else {
-                            rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        }
 
-                        int col = getCollumnSpanSize(rootView);
-                        setupRecyclerView(rootView, col);
-                        initLoader();
+                            if (Build.VERSION.SDK_INT < 16) {
+                                rootView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                            } else {
+                                rootView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            }
+
+                            int col = getCollumnSpanSize(rootView);
+                            setupRecyclerView(rootView, col);
+                             initLoader();
+
+
 
                     }
                 });
@@ -88,21 +93,42 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
     }
 
 
+
+
     /**
      * force loader to reload data
      */
-    private void forceReloadData(){
+    public void onSelectionChange() {
         Bundle bundle = new Bundle();
         bundle.putInt(VIEW_CRITERIA,
                 SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
-        onSelectionChange(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
+        if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
+            setEmptyView();
+        } else {
+            disableEmptyView();
+        }
     }
 
-    private void initLoader(){
+    private void initLoader() {
         Bundle bundle = new Bundle();
-        bundle.putInt(VIEW_CRITERIA,SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
-        getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle,
-                MovieListFragment.this);
+        int choice = SharedPreferenceHelper.getViewCriteriaFromPref(getContext());
+        bundle.putInt(VIEW_CRITERIA, choice);
+        switch(choice){
+            case FAVORITE_CRITERIA:
+                getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
+                disableEmptyView();
+                break;
+            default:
+                // if not connected then dont init loader
+                if (NetworkHelper.isConnectToInternet(getContext())){
+                    getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
+                    disableEmptyView();
+                }
+                else{
+                    setEmptyView();
+                }
+        }
+
     }
 
 
@@ -112,8 +138,8 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
      * @param rootLayout
      */
     private void setupRecyclerView(View rootLayout, int colSpan) {
-        RecyclerView recView = (RecyclerView) rootLayout.findViewById(R.id.recyclerview);
 
+        RecyclerView recView = (RecyclerView) rootLayout.findViewById(R.id.movie_list_recycler_view);
         mAdapter = new MovieCursorRecyclerAdapter(this.getContext(), mCursor);
         mLayoutManager = new GridLayoutManager(getContext(), colSpan);
         recView.setLayoutManager(mLayoutManager);
@@ -143,8 +169,11 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
     /**
      * this called from MainActivity to change the
      * display movies on the main activity
+     *
+     * @return :
+     * false : if and only if network is not available
      */
-    public void onSelectionChange(int choice) {
+    private boolean forceReloadData(int choice) {
         Bundle bundle = new Bundle();
         bundle.putInt(VIEW_CRITERIA, choice);
 
@@ -152,25 +181,25 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
             case FAVORITE_CRITERIA:
                 bundle.putInt(VIEW_CRITERIA, FAVORITE_CRITERIA);
                 getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
-                break;
+                return true;
             case HIGHEST_RATED_CRITERIA:
-                FetchMovieListTask topRatedTask = new FetchMovieListTask(getContext());
-                topRatedTask.execute(MovieTaskHelper.TOP_RATED_STR);
-                bundle.putInt(VIEW_CRITERIA, MovieTaskHelper.HIGHEST_RATED_CRITERIA);
-                getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
-                break;
             case POPULAR_CRITERIA:
-                FetchMovieListTask popukarTask = new FetchMovieListTask(getContext());
-                popukarTask.execute(MovieTaskHelper.POPULAR_STR);
-                bundle.putInt(VIEW_CRITERIA, MovieTaskHelper.POPULAR_CRITERIA);
+                if (!NetworkHelper.isConnectToInternet(getContext())) {
+                    Log.e(TAG, "Not network connection");
+                    return false;
+                }
+
+                FetchMovieListTask fetchTask = new FetchMovieListTask(getContext());
+                String task = (choice == HIGHEST_RATED_CRITERIA) ?
+                        MovieTaskHelper.TOP_RATED_STR : MovieTaskHelper.POPULAR_STR;
+                fetchTask.execute(task);
+                bundle.putInt(VIEW_CRITERIA, choice);
                 getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
-                break;
+                return true;
             default:
                 Log.e(TAG, "Should not get Here !!!");
-                return;
+                return false;
         }
-        SharedPreferenceHelper.storeViewCriteriaToPref(getContext(), choice);
-
     }
 
 
@@ -183,7 +212,7 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         Uri uri = MovieContract.MovieEntry.CONTENT_URI;
         String selection = null;
         String[] selectionArsg = null;
-
+        boolean isConnected = NetworkHelper.isConnectToInternet(getContext());
         // check if we need to classify out others data
         switch (choice) {
             case FAVORITE_CRITERIA:
@@ -214,11 +243,47 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         if (data != null) {
             mCursor = data;
             mAdapter.swapCursor(mCursor);
-        }else{
+        } else {
             // need to fetch from network as database does not have data
-            forceReloadData();
+            if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
+                setEmptyView();
+            } else {
+                disableEmptyView();
+            }
         }
 
+    }
+
+    private void setEmptyView() {
+        // if failed to reload data ... we need to show the empty display
+        View rootView = MovieListFragment.this.getView();
+        RecyclerView mRecyclerView = (RecyclerView) rootView.
+                findViewById(R.id.movie_list_recycler_view);
+        TextView emptyView = (TextView) rootView.findViewById(R.id.movie_list_empty_view);
+        if (mRecyclerView != null) {
+            mRecyclerView.setVisibility(View.INVISIBLE);
+        }
+        if (emptyView != null) {
+            emptyView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * set empty view if network is not available
+     */
+    private void disableEmptyView() {
+        // if failed to reload data ... we need to show the empty display
+        View rootView = MovieListFragment.this.getView();
+        RecyclerView mRecyclerView = (RecyclerView) rootView.
+                findViewById(R.id.movie_list_recycler_view);
+        TextView emptyView = (TextView) rootView.findViewById(R.id.movie_list_empty_view);
+        if (mRecyclerView != null
+                && mRecyclerView.getVisibility() == View.INVISIBLE) {
+            mRecyclerView.setVisibility(View.VISIBLE);
+        }
+        if (emptyView != null) {
+            emptyView.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -226,5 +291,6 @@ public class MovieListFragment extends Fragment implements LoaderManager.LoaderC
         // set cursor to null when data becomes invalid
         mAdapter.swapCursor(null);
     }
+
 
 }

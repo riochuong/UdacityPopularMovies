@@ -43,8 +43,7 @@ public class MovieDetailFragment extends Fragment {
     ImageView mTrailerImg;
     @BindView(R.id.play_trailer_button)
     ImageView mPlayTrailerBtn;
-    @BindView(R.id.fav_fab)
-    FloatingActionButton mFavBtn;
+    @BindView(R.id.fav_fab) FloatingActionButton mFavBtn;
     private static final int MOVIE_DETAIL_LOADER = 1;
     private static final int MOVIE_DETAIL_FAV_LOADER = 2;
     LoaderManager mLoaderManager;
@@ -208,10 +207,7 @@ public class MovieDetailFragment extends Fragment {
 
         @Override
         public Loader<MovieDetailLoaderInfo> onCreateLoader(int id, Bundle args) {
-
             return new FetchMovieDetailsLoaderTask(getContext(), getMovieIdFromAgrs());
-
-
         }
 
         @Override

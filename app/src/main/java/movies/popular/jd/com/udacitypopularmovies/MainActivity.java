@@ -82,23 +82,25 @@ public class MainActivity extends AppCompatActivity {
             case R.id.favor:
                 // get favorites fromd Database.
                 Log.d(TAG,"Query favorite movies rom DB");
-                mvFrag.onSelectionChange(FAVORITE_CRITERIA);
                 SharedPreferenceHelper.
                         storeViewCriteriaToPref(this,FAVORITE_CRITERIA);
+                mvFrag.onSelectionChange();
+
                 break;
             case R.id.popular:
                 // refetch popular movies
                 Log.d(TAG,"Refetch popular movies");
-                mvFrag.onSelectionChange(POPULAR_CRITERIA);
                 SharedPreferenceHelper.
                         storeViewCriteriaToPref(this,POPULAR_CRITERIA);
+                mvFrag.onSelectionChange();
+
                 break;
             case R.id.top_rated:
                 // refetch top rated movie
                 Log.d(TAG,"Refetch top rated movies");
-                mvFrag.onSelectionChange(HIGHEST_RATED_CRITERIA);
                 SharedPreferenceHelper.
                         storeViewCriteriaToPref(this,HIGHEST_RATED_CRITERIA);
+                mvFrag.onSelectionChange();
                 break;
         }
 
