@@ -43,6 +43,19 @@ public class MovieTaskHelper {
     public static final String YOUTUBE_WATCH_URL_BASE =
             "http://www.youtube.com/watch?v=%s";
 
+    public static final String MY_SHARED_PREFS = "my_shared_prefs";
+    public static final String VIEW_CRITERIA = "view_criteria";
+    // only use for two panes mode
+    public static final String CURRENT_SELECTED_MOVIE = "current_selected_movie";
+
+    public static final int FAVORITE_CRITERIA = 0;
+    public static final int  POPULAR_CRITERIA = 1;
+    public static final int HIGHEST_RATED_CRITERIA = 2;
+
+    public  static final String TOP_RATED_STR = "top_rated";
+    public  static final String  POPULAR_STR = "popular";
+
+
     /**
      * build movie URLS request for specific movie trailers
      *
