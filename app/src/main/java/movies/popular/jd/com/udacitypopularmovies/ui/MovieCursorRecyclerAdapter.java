@@ -42,6 +42,7 @@ public class MovieCursorRecyclerAdapter extends
     private boolean mDataValid;
     private Context mContext;
     private int mSortCriteria;
+
     // important to have the data oberver incase the
     // cursor data is changed outside of the app.
     private DataChangeObserver mDataChangeObserver;
@@ -58,7 +59,6 @@ public class MovieCursorRecyclerAdapter extends
             cursor.registerDataSetObserver(mDataChangeObserver);
         }
         mSortCriteria = SharedPreferenceHelper.getViewCriteriaFromPref(mContext);
-
     }
 
 
@@ -128,13 +128,21 @@ public class MovieCursorRecyclerAdapter extends
         int position;
 
         public MovieDetailOnClickListener(Bundle mInfoBundle) {
-
             this.mInfoBundle = mInfoBundle;
         }
 
         @Override
         public void onClick(View view) {
             ((MainActivity)mContext).startMovieDetailView(mInfoBundle);
+        }
+    }
+
+    public void startMovieDetailAtPos(int pos){
+        if (mCursor != null){
+            if (mCursor.moveToPosition(pos)){
+                Bundle bundle = MovieTaskHelper.buildBundleForDetailActivity(mCursor);
+                ((MainActivity)mContext).startMovieDetailView(bundle);
+            }
         }
     }
 

@@ -24,5 +24,8 @@
     <dimen name="review_margin">5dp</dimen>
     <dimen name="fab_elevation">20dp</dimen>
     <dimen name="fab_button_size">60dp</dimen>
+    <dimen name="selected_hight_light">1dp</dimen>
+    <dimen name="nav_header_vertical_spacing">15dp</dimen>
+    <dimen name="nav_header_height">60dp</dimen>
 
 </resources>

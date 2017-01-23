@@ -13,4 +13,14 @@
     <string name="more_trailers">More Trailers</string>
     <string name="reivews">Reviews</string>
     <string name="no_data_available">No Data is Available. This can be due to network connection.</string>
+    <string name="menu_popular_title">Popular Movies</string>
+    <string name="menu_top_rated_item">Top Rated Movies</string>
+    <string name="menu_favorite_movie">Favorite Movies</string>
+    <string name="drawer_close">Drawer left pane is close</string>
+    <string name="drawer_open">Drawer left pane is open</string>
+    <string name="sorting_criteria">Sorting Criteria</string>
+    <string name="popular_menu_item">POPULAR MOVIES</string>
+    <string name="top_rated_menu_item">TOP RATED MOVIES</string>
+    <string name="favorite_menu_item">FAVORITE MOVIES</string>
+    <string name="no_favorites_movies_added">There are no favorite movies added to the list.</string>
 </resources>

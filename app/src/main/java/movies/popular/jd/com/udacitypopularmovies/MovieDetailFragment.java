@@ -1,5 +1,6 @@
 package movies.popular.jd.com.udacitypopularmovies;
 
+import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -96,6 +97,7 @@ public class MovieDetailFragment extends Fragment {
         }
         return v;
     }
+
 
     /**
      * set empty view in the case that

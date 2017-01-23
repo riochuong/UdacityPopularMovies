@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -20,8 +21,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import butterknife.BindView;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieListTask;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
@@ -46,6 +49,7 @@ public class MovieListFragment extends Fragment implements
     GridLayoutManager mLayoutManager = null;
     MovieCursorRecyclerAdapter mAdapter = null;
     Cursor mCursor;
+
 
     // TODO: Rename and change types and number of parameters
     public static MovieListFragment newInstance(String param1, String param2) {
@@ -91,7 +95,6 @@ public class MovieListFragment extends Fragment implements
         return rootView;
     }
 
-
     /**
      * force loader to reload data
      */
@@ -102,7 +105,7 @@ public class MovieListFragment extends Fragment implements
                 SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
         // force data reload here ...if fails ....set empty view instead
         if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
-            setEmptyView();
+            setEmptyView(getString(R.string.no_data_available));
         } else {
             disableEmptyView();
         }
@@ -112,6 +115,7 @@ public class MovieListFragment extends Fragment implements
         Bundle bundle = new Bundle();
         int choice = SharedPreferenceHelper.getViewCriteriaFromPref(getContext());
         bundle.putInt(VIEW_CRITERIA, choice);
+
         switch(choice){
             case FAVORITE_CRITERIA:
                 getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
@@ -124,7 +128,7 @@ public class MovieListFragment extends Fragment implements
                     disableEmptyView();
                 }
                 else{
-                    setEmptyView();
+                    setEmptyView(getString(R.string.no_data_available));
                 }
         }
 
@@ -240,12 +244,37 @@ public class MovieListFragment extends Fragment implements
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
         if (data != null) {
-            mCursor = data;
-            mAdapter.swapCursor(mCursor);
+
+            if (data != null && data.getCount() > 0){
+                mCursor = data;
+                mAdapter.swapCursor(mCursor);
+            }
+            else{
+                // check wha we should do here
+                if (SharedPreferenceHelper.getViewCriteriaFromPref(getContext())
+                        == FAVORITE_CRITERIA){
+                    // looks like we dont have any available data here let's set empty view
+                    setEmptyView(getString(R.string.no_favorites_movies_added));
+                }
+                else{
+                    // maybe this is the first time me might need to refetch the data
+                    if (NetworkHelper.isConnectToInternet(getContext())){
+                        forceReloadData(
+                                SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
+                    }
+                    else{
+                        // really out of network ..needs to show error message
+                        setEmptyView(getString(R.string.no_data_available));
+                    }
+                }
+
+
+            }
+
         } else {
             // need to fetch from network as database does not have data
             if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
-                setEmptyView();
+                setEmptyView(getString(R.string.no_data_available));
             } else {
                 disableEmptyView();
             }
@@ -253,7 +282,7 @@ public class MovieListFragment extends Fragment implements
 
     }
 
-    private void setEmptyView() {
+    private void setEmptyView(String message) {
         // if failed to reload data ... we need to show the empty display
         View rootView = MovieListFragment.this.getView();
         RecyclerView mRecyclerView = (RecyclerView) rootView.
