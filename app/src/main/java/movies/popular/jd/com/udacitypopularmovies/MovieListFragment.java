@@ -245,7 +245,7 @@ public class MovieListFragment extends Fragment implements
     public void onLoadFinished(Loader loader, Cursor data) {
         if (data != null) {
 
-            if (data != null && data.getCount() > 0){
+            if (data.getCount() > 0){
                 mCursor = data;
                 mAdapter.swapCursor(mCursor);
             }
@@ -288,6 +288,7 @@ public class MovieListFragment extends Fragment implements
         RecyclerView mRecyclerView = (RecyclerView) rootView.
                 findViewById(R.id.movie_list_recycler_view);
         TextView emptyView = (TextView) rootView.findViewById(R.id.movie_list_empty_view);
+        emptyView.setText(message);
         if (mRecyclerView != null) {
             mRecyclerView.setVisibility(View.INVISIBLE);
         }
