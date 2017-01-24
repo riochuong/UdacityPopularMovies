@@ -23,4 +23,5 @@
     <string name="top_rated_menu_item">TOP RATED MOVIES</string>
     <string name="favorite_menu_item">FAVORITE MOVIES</string>
     <string name="no_favorites_movies_added">There are no favorite movies added to the list.</string>
+    <string name="severe_app_execption_with_db">Something is seriously went wrong\\n. Please try to re-install the application.</string>
 </resources>

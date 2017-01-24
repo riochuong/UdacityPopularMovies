@@ -2,6 +2,8 @@ package movies.popular.jd.com.udacitypopularmovies.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -21,11 +24,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import movies.popular.jd.com.udacitypopularmovies.R;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
+import movies.popular.jd.com.udacitypopularmovies.tasks.ImageTarget;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieReview;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
 import movies.popular.jd.com.udacitypopularmovies.util.NetworkHelper;
 import movies.popular.jd.com.udacitypopularmovies.util.StorageHelper;
+
+import static movies.popular.jd.com.udacitypopularmovies.util.StorageHelper.getPathToLoadFavImg;
+import static movies.popular.jd.com.udacitypopularmovies.util.StorageHelper.storeDisplayImgs;
 
 /**
  * Created by chuondao on 1/19/17.
@@ -161,7 +168,7 @@ public class MovieDetailsRecylerAdapter extends RecyclerView.Adapter {
     /**
      * should only be called after view inflatted
      */
-    private void setMovieHeaderDataToView (MovieHeaderInfoHolder vh){
+    private void setMovieHeaderDataToView (final MovieHeaderInfoHolder vh){
 
         // do a check in case this is the first launch
         if (mMovieInfo != null){
@@ -173,22 +180,31 @@ public class MovieDetailsRecylerAdapter extends RecyclerView.Adapter {
                     .buildMovieIconUrl(
                             mMovieInfo.getString(MovieContract.MovieEntry.COLUMN_POSTER_PATH));
 
-            if (NetworkHelper.isConnectToInternet(mContext)){
+            File path = getPathToLoadFavImg(
+                                mMovieInfo.getString(MovieContract.MovieEntry.COLUMN_MOVIE_ID),
+                                mContext, StorageHelper.DISP_IMG);
+            if (path != null) {
+                Picasso.with(mContext).load(path).into(vh.mMovieImage);
+            }
+            else if (NetworkHelper.isConnectToInternet(mContext)){
                 // fetch normally from network
-                Picasso.with(mContext).load(imageRequestUri).into(vh.mMovieImage);
-                vh.mMovieImage.setDrawingCacheEnabled(true);
-            } else{
-                // if it's get in here ...sure it's fav movies otherwise this view will
-                // be disable
-                File imgFile = StorageHelper.getPathToLoadFavImg(
+                ImageTarget target = new ImageTarget(StorageHelper.DISP_IMG,
+                                                mContext,
                         mMovieInfo.getString(MovieContract.MovieEntry.COLUMN_MOVIE_ID),
-                        mContext,
-                        StorageHelper.DISP_IMG);
-                Picasso.with(mContext).load(imgFile).into(vh.mMovieImage);
+                        vh.mMovieImage);
+                // picasso to store image
+                Picasso.with(mContext).load(imageRequestUri).into(target);
+            } else{
+                // just set a white background for now
+                vh.mMovieImage.setBackgroundColor(Color.WHITE);
             }
         }
 
     }
+
+
+
+
 
     @Override
     public int getItemCount() {

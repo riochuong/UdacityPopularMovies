@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -24,10 +23,10 @@ import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.F
 import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.HIGHEST_RATED_CRITERIA;
 import static movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper.POPULAR_CRITERIA;
 
-public class MainActivity extends AppCompatActivity
+public class MovieListActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = MovieListActivity.class.getSimpleName();
     private static final String MOVIE_DETAIL_FRAGMENT_TAG = "MVDETAIL_TAG";
     private boolean mTwoPane = false;
 
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         int choice = SharedPreferenceHelper.getViewCriteriaFromPref(this);
         switch(choice){
             case FAVORITE_CRITERIA:
-                mNavigationView.getMenu().getItem(MENU_ITEM_TOP_RATED).setChecked(true);
+                mNavigationView.getMenu().getItem(MENU_ITEM_FAV).setChecked(true);
                 mToolbar.setTitle(R.string.favorite_menu_item);
                 break;
             case POPULAR_CRITERIA:

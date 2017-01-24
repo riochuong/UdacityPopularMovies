@@ -1,10 +1,9 @@
 package movies.popular.jd.com.udacitypopularmovies;
 
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -15,22 +14,24 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchFavMovieOfflineModeLoaderTask;
 import movies.popular.jd.com.udacitypopularmovies.tasks.FetchMovieDetailsOnlineModeLoaderTask;
+import movies.popular.jd.com.udacitypopularmovies.tasks.ImageTarget;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieDetailLoaderInfo;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
@@ -40,6 +41,8 @@ import movies.popular.jd.com.udacitypopularmovies.util.MovieTrailer;
 import movies.popular.jd.com.udacitypopularmovies.util.NetworkHelper;
 import movies.popular.jd.com.udacitypopularmovies.util.StorageHelper;
 
+import static movies.popular.jd.com.udacitypopularmovies.util.StorageHelper.storeDisplayImgs;
+
 
 /**
  * Display movie details in new fragment or separate new activity
@@ -48,18 +51,22 @@ public class MovieDetailFragment extends Fragment {
 
     @BindView(R.id.all_views_recycler_view)
     RecyclerView mHomeView;
-    @BindView(R.id.trailer_img) ImageView mTrailerImg;
+    @BindView(R.id.trailer_img)
+    ImageView mTrailerImg;
     @BindView(R.id.play_trailer_button)
     ImageView mPlayTrailerBtn;
     @BindView(R.id.fav_fab)
     FloatingActionButton mFavBtn;
-    @BindView(R.id.detail_view_main_display) View mMainDisplay;
-    @BindView(R.id.movie_detail_empty_view) View mEmptyTextView;
+    @BindView(R.id.detail_view_main_display)
+    View mMainDisplay;
+    @BindView(R.id.movie_detail_empty_view)
+    View mEmptyTextView;
     private static final int MOVIE_DETAIL_LOADER = 1;
     private static final int MOVIE_DETAIL_FAV_LOADER = 2;
     private static final String TAG = "MovieDetailFragment";
     LoaderManager mLoaderManager;
-    Pair<String,String> mReviewTrailerGson = null;
+    Pair<String, String> mReviewTrailerGson = null;
+
     public MovieDetailFragment() {
 
     }
@@ -82,16 +89,13 @@ public class MovieDetailFragment extends Fragment {
                 LinearLayoutManager.VERTICAL, false);
 
         mHomeView.setLayoutManager(allViewLayout);
-        mTrailerImg.setDrawingCacheEnabled(true);
         mLoaderManager = getLoaderManager();
 
         // if we are in offline mode then only fetch from db if movie is favorite movies.....
         if (NetworkHelper.isConnectToInternet(getContext())
-            || isBundleSaidMovieFav())
-        {
+                || isBundleSaidMovieFav()) {
             initLoader();
-        }
-        else {
+        } else {
             // set empty display
             setEmptyDisplay();
         }
@@ -103,11 +107,11 @@ public class MovieDetailFragment extends Fragment {
      * set empty view in the case that
      * network is not connected and movie is not favorite
      */
-    private void setEmptyDisplay(){
-        if (mMainDisplay != null){
-           mMainDisplay.setVisibility(View.INVISIBLE);
+    private void setEmptyDisplay() {
+        if (mMainDisplay != null) {
+            mMainDisplay.setVisibility(View.INVISIBLE);
         }
-        if (mEmptyTextView != null){
+        if (mEmptyTextView != null) {
             mEmptyTextView.setVisibility(View.VISIBLE);
         }
 
@@ -164,13 +168,8 @@ public class MovieDetailFragment extends Fragment {
 
                         Uri uri = MovieContract.MovieEntry
                                 .buildMovieFavUpdateUri(getMovieIdFromAgrs());
-                        // this mean fav selected
-                        if (res > 0) {
-                            Log.d(TAG, "Store images locally");
-                            storeDisplayAndTrailerImgs(movieId);
-                        }
-                        // TODO: GSON to store reviews and comments
-                        if (mReviewTrailerGson != null){
+
+                        if (mReviewTrailerGson != null) {
                             cv.put(MovieContract.MovieEntry.COLUMN_TRAILER,
                                     mReviewTrailerGson.first);
                             cv.put(MovieContract.MovieEntry.COLUMN_REVIEW,
@@ -189,37 +188,6 @@ public class MovieDetailFragment extends Fragment {
                     }
                 }
         );
-    }
-
-    /**
-     * store movie img and trailer images to internal storage
-     *
-     * @param movieId
-     */
-    private void storeDisplayAndTrailerImgs(String movieId) {
-        // let's store display first
-        String dispImgPath = StorageHelper.getPathToStoreFavImg(movieId, getContext(),
-                StorageHelper.DISP_IMG);
-        if (dispImgPath != null) {
-            ImageView imgView =
-                    (ImageView) getView().findViewById(R.id.movie_poster_img);
-            if (imgView != null) {
-                Bitmap drawable = imgView.getDrawingCache(true);
-                StorageHelper.storeBitmapToInternal(dispImgPath, drawable);
-            }
-        }
-
-        // now store trailer img
-        String trailerImgPath = StorageHelper.
-                getPathToStoreFavImg(movieId, getContext(), StorageHelper.TRAILER_IMG);
-        // if path is null means the file exists and wwe dont have to do anything
-        if (trailerImgPath != null) {
-            ImageView imgView = (ImageView) getView().findViewById(R.id.trailer_img);
-            if (imgView != null) {
-                Bitmap drawable = imgView.getDrawingCache(true);
-                StorageHelper.storeBitmapToInternal(trailerImgPath, drawable);
-            }
-        }
     }
 
 
@@ -281,6 +249,8 @@ public class MovieDetailFragment extends Fragment {
     }
 
 
+
+
     /**
      *
      */
@@ -293,7 +263,7 @@ public class MovieDetailFragment extends Fragment {
             // if movie passed in is favorite and no network connection
             // we might have to load everything from the db !
             if (isBundleSaidMovieFav() &&
-                    (! NetworkHelper.isConnectToInternet(getContext()))){
+                    (!NetworkHelper.isConnectToInternet(getContext()))) {
                 return new FetchFavMovieOfflineModeLoaderTask(getContext(), getMovieIdFromAgrs());
             }
             // esle we fetch movie specific data from network
@@ -315,7 +285,7 @@ public class MovieDetailFragment extends Fragment {
 
                 // official trailer most of the time is at the first position
                 MovieTrailer officialTrailer = (data.getmTrailerList() != null
-                                                    && data.getmTrailerList().size()  > 0 ) ?
+                        && data.getmTrailerList().size() > 0) ?
                         data.getmTrailerList().get(0) : null;
                 setMovieTrailerImg(officialTrailer);
             }
@@ -335,41 +305,65 @@ public class MovieDetailFragment extends Fragment {
         // use picasso to load image to view
         if (officialTrailer != null) {
 
-            // if we have network then fetch from online
-            if (NetworkHelper.isConnectToInternet(getContext())){
-                Picasso.with(getContext()).
-                        load(MovieTaskHelper
-                                .buildYoutubeThumbnailRequestUrl(officialTrailer.getSource()))
-                        .into(mTrailerImg);
+            /// try to see if we can load img locally
+            File trailerFile = StorageHelper.getPathToLoadFavImg(
+                    getMovieIdFromAgrs(), getContext(), StorageHelper.TRAILER_IMG
+            );
 
-            } else if (isBundleSaidMovieFav()){
+            // load image locally
+            if (trailerFile != null) {
 
-                // else load fav movie img from internal storage
-                File trailerFile = StorageHelper.getPathToLoadFavImg(
-                        getMovieIdFromAgrs(),getContext(),StorageHelper.TRAILER_IMG
-                );
                 Picasso.with(getContext()).
                         load(trailerFile)
                         .into(mTrailerImg);
-            } else{
-                // do nothing here
-                return ;
+
+            }
+            // no image available -- have to load it from online
+            else if (NetworkHelper.isConnectToInternet(getContext())) {
+                ImageTarget target = new ImageTarget(
+                        StorageHelper.TRAILER_IMG,
+                        getContext(),
+                        getMovieIdFromAgrs(),
+                        mTrailerImg
+                );
+                Picasso.with(getContext()).
+                        load(MovieTaskHelper
+                                .buildYoutubeThumbnailRequestUrl(officialTrailer.getSource()))
+                        .into(target);
+
             }
 
+            // for now just set the button
+            // set only click listener to launch youtube only if
+            // there is app to handle the intent
+            final Intent launchYoutube = MovieTaskHelper
+                    .buildYoutubeIntend(officialTrailer.getSource());
+            if (IsThereAppHandleYoutube(launchYoutube)) {
+                mPlayTrailerBtn.setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                // build and launch trailer with youtube.
 
-            // set only click listener to launch youtube
-            mPlayTrailerBtn.setOnClickListener(
-                    new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            // build and launch trailer with youtube.
-                            Intent launchYoutube = MovieTaskHelper
-                                    .buildYoutubeIntend(officialTrailer.getSource());
-                            getContext().startActivity(launchYoutube);
+                                getContext().startActivity(launchYoutube);
+                            }
                         }
-                    }
-            );
+                );
+            }
+
         }
+    }
+
+    /**
+     * verify if there is app to launch youtube in case user do not have proper browser
+     * @param intent
+     * @return
+     */
+    private boolean IsThereAppHandleYoutube(Intent intent){
+        PackageManager packageManager = getContext().getPackageManager();
+        List activities = packageManager.queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        return (activities.size() > 0);
     }
 
     private class MovieFavCursorLoaderCallBacks implements LoaderManager.LoaderCallbacks<Cursor> {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="severe_app_execption_with_db" type="id">Something seriously went wrong\n. Please try
+        to reinstall the app
+    </item>
+</resources>

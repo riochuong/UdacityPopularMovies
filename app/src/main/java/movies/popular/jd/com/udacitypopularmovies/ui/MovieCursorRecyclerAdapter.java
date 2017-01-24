@@ -1,15 +1,10 @@
 package movies.popular.jd.com.udacitypopularmovies.ui;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.ContentObservable;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.DataSetObserver;
-import android.os.Build;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,14 +15,17 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
-import java.util.HashMap;
+import java.io.File;
 
-import movies.popular.jd.com.udacitypopularmovies.MainActivity;
+import movies.popular.jd.com.udacitypopularmovies.MovieListActivity;
 import movies.popular.jd.com.udacitypopularmovies.R;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
+import movies.popular.jd.com.udacitypopularmovies.tasks.ImageTarget;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieCursorHelper;
 import movies.popular.jd.com.udacitypopularmovies.tasks.MovieTaskHelper;
+import movies.popular.jd.com.udacitypopularmovies.util.NetworkHelper;
 import movies.popular.jd.com.udacitypopularmovies.util.SharedPreferenceHelper;
+import movies.popular.jd.com.udacitypopularmovies.util.StorageHelper;
 
 /**
  * movie list Recycler adapter
@@ -95,6 +93,8 @@ public class MovieCursorRecyclerAdapter extends
         holder.itemView.setOnClickListener(new MovieDetailOnClickListener(
                 MovieTaskHelper.buildBundleForDetailActivity(cursor)));
 
+        // so we can get bitmap and save the image
+
 
         holder.mMovieName.setText(
                 MovieCursorHelper.getMovieNameFromCursor(cursor));
@@ -110,9 +110,30 @@ public class MovieCursorRecyclerAdapter extends
         String posterPath = MovieCursorHelper.getMoviePosterPath(cursor);
 
         // use picasso to load image to image view
-        Picasso.with(mContext).
-                load(MovieTaskHelper.buildMovieIconUrl(posterPath))
-                .into(holder.mImgView);
+        File path = StorageHelper.getPathToLoadFavImg(movieId,mContext,StorageHelper.DISP_IMG);
+
+        if (path != null){
+            Picasso.with(mContext).
+                    load(path)
+                    .into(holder.mImgView);
+        } else if (NetworkHelper.isConnectToInternet(mContext)){
+
+            // create target for exercising call back to both save and load image
+            ImageTarget target = new ImageTarget(
+                    StorageHelper.DISP_IMG,
+                    mContext,
+                    movieId,
+                    holder.mImgView
+            );
+
+            Picasso.with(mContext).
+                    load(MovieTaskHelper.buildMovieIconUrl(posterPath))
+                    .into(target);
+        } else{
+            // set white background for now
+            holder.mImgView.setBackgroundColor(Color.WHITE);
+        }
+
     }
 
 
@@ -133,7 +154,7 @@ public class MovieCursorRecyclerAdapter extends
 
         @Override
         public void onClick(View view) {
-            ((MainActivity)mContext).startMovieDetailView(mInfoBundle);
+            ((MovieListActivity)mContext).startMovieDetailView(mInfoBundle);
         }
     }
 
@@ -141,7 +162,7 @@ public class MovieCursorRecyclerAdapter extends
         if (mCursor != null){
             if (mCursor.moveToPosition(pos)){
                 Bundle bundle = MovieTaskHelper.buildBundleForDetailActivity(mCursor);
-                ((MainActivity)mContext).startMovieDetailView(bundle);
+                ((MovieListActivity)mContext).startMovieDetailView(bundle);
             }
         }
     }

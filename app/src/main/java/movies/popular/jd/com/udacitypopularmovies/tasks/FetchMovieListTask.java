@@ -17,6 +17,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import movies.popular.jd.com.udacitypopularmovies.MovieListActivity;
+import movies.popular.jd.com.udacitypopularmovies.MovieListFragment;
+import movies.popular.jd.com.udacitypopularmovies.R;
 import movies.popular.jd.com.udacitypopularmovies.data.MovieContract;
 import movies.popular.jd.com.udacitypopularmovies.util.MovieQueryJsonParser;
 
@@ -37,6 +40,8 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
     private static final String TAG = "FETCH_MOVIE_TASK";
 
     private Context mContext = null;
+
+
 
     public FetchMovieListTask( Context ctx) {
         mContext = ctx;
@@ -95,5 +100,14 @@ public class FetchMovieListTask extends AsyncTask<String, Void, Void> {
         return null;
     }
 
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        // call to refresh the UI when data is ready !!!
+        MovieListFragment mvFrag = (MovieListFragment)
+                ((MovieListActivity)mContext).getSupportFragmentManager()
+                        .findFragmentById(R.id.movie_list_fragment);
 
+        mvFrag.onSelectionChange();
+
+    }
 }

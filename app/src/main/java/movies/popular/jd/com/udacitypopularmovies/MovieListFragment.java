@@ -104,34 +104,15 @@ public class MovieListFragment extends Fragment implements
         bundle.putInt(VIEW_CRITERIA,
                 SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
         // force data reload here ...if fails ....set empty view instead
-        if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
-            setEmptyView(getString(R.string.no_data_available));
-        } else {
-            disableEmptyView();
-        }
+        forceReloadData();
+
     }
 
     private void initLoader() {
         Bundle bundle = new Bundle();
         int choice = SharedPreferenceHelper.getViewCriteriaFromPref(getContext());
         bundle.putInt(VIEW_CRITERIA, choice);
-
-        switch(choice){
-            case FAVORITE_CRITERIA:
-                getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
-                disableEmptyView();
-                break;
-            default:
-                // if not connected then dont init loader
-                if (NetworkHelper.isConnectToInternet(getContext())){
-                    getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
-                    disableEmptyView();
-                }
-                else{
-                    setEmptyView(getString(R.string.no_data_available));
-                }
-        }
-
+        getLoaderManager().initLoader(MOVIE_LIST_FRAGMENT_LOADER,bundle,this);
     }
 
 
@@ -170,40 +151,33 @@ public class MovieListFragment extends Fragment implements
 
 
     /**
-     * this called from MainActivity to change the
+     * this called from MovieListActivity to change the
      * display movies on the main activity
      *
      * @return :
      * false : if and only if network is not available
      */
-    private boolean forceReloadData(int choice) {
+    private void forceReloadData() {
+        int choice = SharedPreferenceHelper.getViewCriteriaFromPref(getContext());
         Bundle bundle = new Bundle();
         bundle.putInt(VIEW_CRITERIA, choice);
+        getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
 
-        switch (choice) {
-            case FAVORITE_CRITERIA:
-                bundle.putInt(VIEW_CRITERIA, FAVORITE_CRITERIA);
-                getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
-                return true;
-            case HIGHEST_RATED_CRITERIA:
-            case POPULAR_CRITERIA:
-                if (!NetworkHelper.isConnectToInternet(getContext())) {
-                    Log.e(TAG, "Not network connection");
-                    return false;
-                }
-
-                FetchMovieListTask fetchTask = new FetchMovieListTask(getContext());
-                String task = (choice == HIGHEST_RATED_CRITERIA) ?
-                        MovieTaskHelper.TOP_RATED_STR : MovieTaskHelper.POPULAR_STR;
-                fetchTask.execute(task);
-                bundle.putInt(VIEW_CRITERIA, choice);
-                getLoaderManager().restartLoader(MOVIE_LIST_FRAGMENT_LOADER, bundle, this);
-                return true;
-            default:
-                Log.e(TAG, "Should not get Here !!!");
-                return false;
-        }
     }
+
+    /**
+     * force refetch data and update the DB
+     */
+    private void foreReFetchDataFromNetwork(){
+            int choice = SharedPreferenceHelper.getViewCriteriaFromPref(getContext());
+            Log.e(TAG, "Network connected refetch from Internet");
+            String task = (choice == HIGHEST_RATED_CRITERIA) ?
+                    MovieTaskHelper.TOP_RATED_STR : MovieTaskHelper.POPULAR_STR;
+            FetchMovieListTask fetchTask = new FetchMovieListTask(getContext());
+            fetchTask.execute(task);
+    }
+
+
 
 
     //************ LOADER CALL BACKS ******************************
@@ -215,7 +189,6 @@ public class MovieListFragment extends Fragment implements
         Uri uri = MovieContract.MovieEntry.CONTENT_URI;
         String selection = null;
         String[] selectionArsg = null;
-        boolean isConnected = NetworkHelper.isConnectToInternet(getContext());
         // check if we need to classify out others data
         switch (choice) {
             case FAVORITE_CRITERIA:
@@ -244,40 +217,22 @@ public class MovieListFragment extends Fragment implements
     @Override
     public void onLoadFinished(Loader loader, Cursor data) {
         if (data != null) {
-
             if (data.getCount() > 0){
                 mCursor = data;
                 mAdapter.swapCursor(mCursor);
-            }
-            else{
-                // check wha we should do here
-                if (SharedPreferenceHelper.getViewCriteriaFromPref(getContext())
-                        == FAVORITE_CRITERIA){
-                    // looks like we dont have any available data here let's set empty view
-                    setEmptyView(getString(R.string.no_favorites_movies_added));
-                }
-                else{
-                    // maybe this is the first time me might need to refetch the data
-                    if (NetworkHelper.isConnectToInternet(getContext())){
-                        forceReloadData(
-                                SharedPreferenceHelper.getViewCriteriaFromPref(getContext()));
-                    }
-                    else{
-                        // really out of network ..needs to show error message
-                        setEmptyView(getString(R.string.no_data_available));
-                    }
-                }
-
-
+                disableEmptyView();
+            } else if (NetworkHelper.isConnectToInternet(getContext())){
+                // try to force refetch data
+                foreReFetchDataFromNetwork();
+            } else {
+                // reach here mean nothing we can do ..must display empty view.
+                setEmptyView(getString(R.string.no_data_available));
             }
 
         } else {
-            // need to fetch from network as database does not have data
-            if (!forceReloadData(SharedPreferenceHelper.getViewCriteriaFromPref(getContext()))) {
-                setEmptyView(getString(R.string.no_data_available));
-            } else {
-                disableEmptyView();
-            }
+            // hope we are not getting here
+           // some thing is really wrong here ...might need to re-install the apps
+            setEmptyView(getString(R.string.severe_app_execption_with_db));
         }
 
     }

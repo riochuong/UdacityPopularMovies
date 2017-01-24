@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.ImageView;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -110,8 +111,6 @@ public class StorageHelper {
 
     /**
      * serialize data to store in db
-     * @param l1
-     * @param l2
      * @return
      */
     public static Pair<String,String>
@@ -132,6 +131,24 @@ public class StorageHelper {
         Type type = new TypeToken<List<MovieTrailer>>(){}.getType();
         List<MovieTrailer> listObjs = new Gson().fromJson(orig, type);
         return listObjs;
+    }
+
+
+    /**
+     * store movie img and trailer images to internal storage
+     *
+     * @param movieId
+     */
+    public static void storeDisplayImgs(String movieId, ImageView view, int choice, Context ctx) {
+        // let's store display first
+        String dispImgPath = StorageHelper.getPathToStoreFavImg(movieId, ctx,
+                choice);
+        if (dispImgPath != null) {
+            if (view != null) {
+                Bitmap drawable = view.getDrawingCache(true);
+                StorageHelper.storeBitmapToInternal(dispImgPath, drawable);
+            }
+        }
     }
 
 }
